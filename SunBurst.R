@@ -20,10 +20,15 @@ df1 <- (df
                             `Part-time employees` = "PartTime")))
   
 df2 <- data.frame((df1 
-         %>% unite(new, REF_DATE:Sex,sep = "-")))
+         %>% unite(new, REF_DATE:Sex,sep = "-"))
+         %>% drop_na()
+         %>% rename(value = VALUE))
+
+
+ 
 
 #not displaying wages but percentages?
-sunburst(df2)
+sunburst(df2,percent = FALSE)
 
 
 
