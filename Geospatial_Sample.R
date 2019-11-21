@@ -37,9 +37,9 @@ library(rgdal) #This seems to work better for me than sf for reading shape files
 ## Zip File into Local Directory
 download.file("https://www12.statcan.gc.ca/census-recensement/2016/dp-pd/hlt-fst/edu-sco/Tables/Files/98-402-X2016010-T4-csv-eng.zip", destfile="statscan.zip")
 
-## Read CSV
+## Read CSV (Note: Parsing failures are blank rows in the data)
 ## Put Fields of Study as Identifiers next to education level in a single column
-
+## Collect Industry counts and Industry Percentages into one column each with labels
 source <- (read_csv(unzip("statscan.zip", "98-402-X2016010-T4-CANPR-eng.csv")) 
            %>% rename("Freq"="Total – STEM and BHASE (non-STEM) groupings - Classification of Instructional Programs (CIP) 2016 (2016 counts)",
                       "SciTech"="STEM fields of study - Science and science technology (2016 counts)",
@@ -50,28 +50,22 @@ source <- (read_csv(unzip("statscan.zip", "98-402-X2016010-T4-CANPR-eng.csv"))
                       "SocSci"="BHASE (non-STEM) fields of study - Social and behavioural sciences (2016 counts)",
                       "Legal"="BHASE (non-STEM) fields of study - Legal professions and studies (2016 counts)",
                       "Health"="BHASE (non-STEM) fields of study - Health care (2016 counts)",
-                      "Education"="BHASE (non-STEM) fields of study - Education and teaching (2016 counts)",
+                      "EdTeach"="BHASE (non-STEM) fields of study - Education and teaching (2016 counts)",
                       "Trade"="BHASE (non-STEM) fields of study - Trades, services, natural resources and conservation (2016 counts)",
-                      "TotalPercent"="Total – STEM and BHASE (non-STEM) groupings - Classification of Instructional Programs (CIP) 2016 (% distribution 2016)",
-                      "SciTechPercent"="STEM fields of study - Science and science technology (% distribution 2016)",
-                      "EngTechPercent"="STEM fields of study - Engineering and engineering technology (% distribution 2016)",
-                      "MathCSPercent"="STEM fields of study - Mathematics and computer and information science (% distribution 2016)",
-                      "BizAdminPercent"="BHASE (non-STEM) fields of study - Business and administration (% distribution 2016)",
-                      "ArtsyPercent"="BHASE (non-STEM) fields of study - Arts and humanities (% distribution 2016)",
-                      "SocSciPercent"="BHASE (non-STEM) fields of study - Social and behavioural sciences (% distribution 2016)",
-                      "LegalPercent"="BHASE (non-STEM) fields of study - Legal professions and studies (% distribution 2016)",
-                      "HealthPercent"="BHASE (non-STEM) fields of study - Health care (% distribution 2016)",
-                      "EducationPercent"="BHASE (non-STEM) fields of study - Education and teaching (% distribution 2016)",
-                      "TradePercent"="BHASE (non-STEM) fields of study - Trades, services, natural resources and conservation (% distribution 2016)")
+                      "TotalPercent"="Total – STEM and BHASE (non-STEM) groupings - Classification of Instructional Programs (CIP) 2016 (% distribution 2016)"
            )
+           %>% drop_na()
+           %>% gather(c(9:18), key="Industry", value="Counts") 
+           %>% gather(c(10:19), key="IndustryPercent", value="Percent")
+           %>% dplyr::select(-c("Geographic code", "Global non-response rate", "Data quality flag", "TotalPercent", "IndustryPercent"))
+)
 
-source %>% gather(key="Industry", values="Counts", 9:18)
 
 ## Load Shape File
 
 canada_shape <- readOGR("Shape Files/lpr_000b16a_e.shp")
 
-#Project shape file to latitude/longitude (scaling for map overlay)
+#Project shape file to latitude/longitude (scaling for map overlay if needed)
 p3 <- spTransform(boroughs, CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")) 
 
 #Force transformed shape file into data frame so it can be put over the map as geom_map
@@ -83,12 +77,8 @@ buffer <- 0.01        ## Add a small lat/long buffer to the edges of the map lay
 darkness_value <- 0.25 ## Transparency setting for scatter points
 tint <- 0.4           ## Tinting for watercolor map and shape files (make things a little less vibrant so the data shows up better)
 
-## Pull Stamen Watercolor map without utility function shown in class (fewer lines of code as only one map is used here)
-canada_map <- get_stamenmap(bbox=c(left=(min(tidydta$long)-buffer), right=(max(tidydta$long)+buffer), 
-                                bottom= (min(tidydta$lat)-buffer), top= (max(tidydta$lat))+buffer),zoom=3, 
-                         maptype="watercolor", messaging=FALSE)
-
-#Map Coding (Takes 2-3 minutes to run on my desktop at least)
+#Changed plot, forgot to update this part
+#Will fill in sometime tomorrow
 (ggplot(source)
   + geom_sf(aes(fill=),alpha=tint, map=tidydta, color="#404040")
 + scale_fill_viridis(name = "Industry", discrete=TRUE, option="plasma")
@@ -106,3 +96,7 @@ canada_map <- get_stamenmap(bbox=c(left=(min(tidydta$long)-buffer), right=(max(t
         axis.title.y = element_text(size=18),
         strip.text.x = element_text(size=20),)
 )
+
+## Next steps:
+
+## Possible breakdown by major metropolitan areas
