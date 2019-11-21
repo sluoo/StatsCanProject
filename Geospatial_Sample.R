@@ -66,7 +66,7 @@ source <- (read_csv(unzip("statscan.zip", "98-402-X2016010-T4-CANPR-eng.csv"))
 canada_shape <- readOGR("Shape Files/lpr_000b16a_e.shp")
 
 #Project shape file to latitude/longitude (scaling for map overlay if needed)
-p3 <- spTransform(boroughs, CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")) 
+p3 <- spTransform(canada_shape, CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")) 
 
 #Force transformed shape file into data frame so it can be put over the map as geom_map
 #Will generate some warning messages if warnings are not suppressed, which don't seem to be relevant, 
