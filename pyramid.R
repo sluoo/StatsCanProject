@@ -1,6 +1,7 @@
 library(tidyverse)
 library(cansim)
 library(stringr)
+library(gganimate)
 
 dta <- get_cansim(1410005101) %>% normalize_cansim_values()
 
@@ -12,9 +13,10 @@ dta1 <- (dta
                     str_starts(`Job tenure`,"Average",negate = TRUE),
                     str_starts(`Type of work`,"Full"),
                     Sex != "Both sexes",
-                    str_detect(`Age group`, "to|65"))
+                    str_detect(`Age group`, "to|65"),
+                    str_detect(`Age group`,"44",negate = TRUE))
          %>% mutate(`Job tenure`=factor(`Job tenure`),Sex=factor(Sex),
-                    REF_DATE=factor(REF_DATE),`Age group`=factor(`Age group`),
+                    REF_DATE=as.integer(REF_DATE),`Age group`=factor(`Age group`),
                     VALUE=as.numeric(VALUE))
          %>% drop_na())
 
@@ -35,6 +37,7 @@ dta3 <- (mutate(dta2, `Job tenure` = fct_relevel(dta2$`Job tenure`,
                                                   "10 to 20 years",
                                                   "20 years plus"))))
 
+
 #plot job tenure
 p <- (ggplot(dta3, aes(x=fct_inorder(`Job tenure`),y=VALUE,fill=Sex)) 
       + geom_col(data= subset(dta2,Sex== "Males")) 
@@ -43,6 +46,27 @@ p <- (ggplot(dta3, aes(x=fct_inorder(`Job tenure`),y=VALUE,fill=Sex))
       + coord_flip()
       + theme_classic())
            
+
+g <- (ggplot(dta3, aes(x=fct_inorder(`Age group`),y=VALUE,fill=Sex)) 
+      + geom_col(data= subset(dta2,Sex== "Males")) 
+      + geom_col(data=subset(dta2, Sex== "Females"), aes(y=(VALUE)*-1))
+      + scale_fill_brewer(palette = "Set2")
+      + coord_flip()
+      + theme_classic())
+
+p1 <- (p
+       + labs(title = 'Year:{frame_time}')
+       + transition_time(REF_DATE) 
+       + ease_aes('linear'))
+
+animate(p1, fps = 2) #slower
+
+g1 <- (g
+       + labs(title = 'Year:{frame_time}')
+       + transition_time(REF_DATE) 
+       + ease_aes('linear'))
+
+animate(g1, fps = 2) #slower
 
 
 
