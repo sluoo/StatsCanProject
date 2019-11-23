@@ -28,19 +28,22 @@ devtools::install_github("yutannihilation/ggsflabel")
 library(ggsflabel)
 library(cartogram)
 
-#Current figure is gender breakdown by region and industry
-#Create multiple facet plots in question
-#Can add more stuff as needed
+##Facet plot for gender breakdown by Industry
+## Additional tooltips for Workforce size, male and female median annual wages
 
-##Download and Read zip file into local director
-## Next step is to redirect it into a neater folder... sorry about that
+####################################################
+
+##Download Original Zip File for Industry by Gender
 download.file("https://www12.statcan.gc.ca/census-recensement/2016/dp-pd/hlt-fst/edu-sco/Tables/Files/98-402-X2016010-T4-csv-eng.zip", destfile="statscan.zip")
 
-## Unzip and read CSV (Note: Parsing failures are blank rows in the data)
+##Wage Data File by Industry
+##Custom extraction from original 6GB census data
+wages <- read_csv("wageData.csv")
+
+## Unzip and read CSV for Industry by Gender (Note: Parsing failures are blank rows in the data)
 ## Many, many columns to rename...
 ## Drop useless columns and NA rows
 source <- read_csv(unzip("statscan.zip", "98-402-X2016010-T4-CANPR-eng.csv")) 
-wages <- read_csv("wageData.csv")
 source_renamed <- (source %>% rename("GeoName"="Geographic name", 
                                      "AreaTotal"="Total – STEM and BHASE (non-STEM) groupings - Classification of Instructional Programs (CIP) 2016 (2016 counts)",
                                      "Science and science technology"="STEM fields of study - Science and science technology (2016 counts)",
@@ -56,19 +59,14 @@ source_renamed <- (source %>% rename("GeoName"="Geographic name",
                                      "TotalPercent"="Total – STEM and BHASE (non-STEM) groupings - Classification of Instructional Programs (CIP) 2016 (% distribution 2016)"
 )
 %>% drop_na()
-%>% dplyr::select(-c(19:29))
 %>% filter(GeoName!="Canada")
 %>% filter(Age=="All ages, 15-plus")
-%>% dplyr::select(-c("Geographic code", "Age", "Global non-response rate", "Data quality flag"))
+%>% dplyr::select(-c("Geographic code", "Age", "Global non-response rate", "Data quality flag", 19:29))
 )
 
-
-
-merged <- (source_renamed %>% gather(c(5:14), key="Industry", value="CountByIndustry") 
+## Join wage data with demographic data
+merged <- (source_renamed %>% gather(c(5:14), key="Industry", value="WorkforceSize") 
 %>% left_join(wages))
-###############################################
-
-#There may be a way to simplify this...
 
 ##Numbers for both genders
 bothsexes <- (merged
@@ -81,46 +79,53 @@ bothsexes <- (merged
 females <- (merged
             %>% filter(Sex== "Female")
             %>% rename("Median Income (Female)"="Median Income",
-                       "FemaleGenderCount"="CountByIndustry")
-            %>% dplyr::select(-c("Sex"))
+                       "FemaleGenderCount"="WorkforceSize")
+            %>% dplyr::select(-c("Sex", "AreaTotal"))
 )
 
 ##Numbers for males only
 males <- (merged
             %>% filter(Sex== "Male")
             %>% rename("Median Income (Male)"="Median Income")
-          %>% dplyr::select(-c("CountByIndustry", "Sex"))
+          %>% dplyr::select(-c("WorkforceSize", "Sex", "AreaTotal"))
 )
+
 
 ##Recombine Tables and Calculate Female Proportions
 ##Filter out Most Frequent Industries per Jurastiction
 femaleprop <- (left_join(bothsexes,females) %>% left_join(males)
-               %>% mutate(FemalePercent = round(100*(FemaleGenderCount/CountByIndustry), digits=0))
+               %>% mutate(FemalePercent = round(100*(FemaleGenderCount/WorkforceSize), digits=0))
 )
 
-####################################################
-
+##Extract most common industry by education level, based on femaleprop table
 ##Create Five Tables For Different Education Levels
-##Within each table, extract top value for each province
+##Within each table, extract top value for each province, then rejoin all at the end
 ##Not ideal but this level of striation requires some drastic measures to clean
 
 College <- (femaleprop %>% filter(Education=="College, CEGEP or other non-university certificate or diploma") 
-            %>% group_by(GeoName) %>% slice(which.max(TotalGenderCount)))
+            %>% group_by(GeoName) %>% slice(which.max(WorkforceSize)))
 UniCert <- (femaleprop %>% filter(Education=="University certificate, diploma or degree at bachelor level or above")
-            %>% group_by(GeoName) %>% slice(which.max(TotalGenderCount)))
+            %>% group_by(GeoName) %>% slice(which.max(WorkforceSize)))
 Bach <- (femaleprop %>% filter(Education=="Bachelor's degree")
-         %>% group_by(GeoName) %>% slice(which.max(TotalGenderCount)))
+         %>% group_by(GeoName) %>% slice(which.max(WorkforceSize)))
 Master <- (femaleprop %>% filter(Education=="Master's degree")
-           %>% group_by(GeoName) %>% slice(which.max(TotalGenderCount)))
+           %>% group_by(GeoName) %>% slice(which.max(WorkforceSize)))
 PhD <- (femaleprop %>% filter(Education=="Earned doctorate")
-        %>% group_by(GeoName) %>% slice(which.max(TotalGenderCount)))
+        %>% group_by(GeoName) %>% slice(which.max(WorkforceSize)))
 
 #Final Cleaned Data Table
 dtafin <- (bind_rows(College, UniCert, Bach, Master, PhD, id=NULL))
-               
+##Factor Education Column (do this at end with fewer rows to worry about)
+dtafin$Education <- factor(dtafin$Education, levels = c("College, CEGEP or other non-university certificate or diploma",
+                                                        "University certificate, diploma or degree at bachelor level or above",
+                                                        "Bachelor's degree",
+                                                        "Master's degree",
+                                                        "Earned doctorate"), ordered = TRUE)             
+
+####################################################
 
 ## Load Shape File, Join Shape File with Data (it works reasonably now even on my laptop)
-## Major change is the shape file used - less precise but reduces render time to seconds from minutes
+## Major change is the shape file used - less precise but reduces render time
 canada_shape <- st_read("Shape Files/Digital Boundary/lpr_000a16a_e.shp")
 joined_dta <- left_join(canada_shape, dtafin, by=c("PRENAME"="GeoName")) %>% dplyr::rename("Jurisdiction"="PRENAME")
 
@@ -139,7 +144,12 @@ Facet_names <- c(
 ##Trick is to use dummy aesthetics to display info in joined table
 
 plot <- (ggplot(joined_dta)
-         + geom_sf(aes(common=Jurisdiction, fill=Industry, label=FemalePercent, geometry=geometry))
+         + geom_sf(aes(common=Jurisdiction, 
+                       fill=Industry, label1=WorkforceSize, 
+                       label2=FemalePercent, 
+                       label3=`Median Income (Female)`,
+                       label4=`Median Income (Male)`,
+                       geometry=geometry))
          + scale_fill_viridis(discrete=TRUE, option="plasma")
          + xlab("Longitude")
          + ylab("Latitude")
@@ -148,7 +158,7 @@ plot <- (ggplot(joined_dta)
          + guides(alpha=FALSE)
          + theme(legend.position=c(0.83, 0.25), 
                  panel.spacing = unit(0.5, "lines"),
-                 axis.text = element_text(size=10),
+                 axis.text = element_blank(),
                  axis.ticks=element_blank(),
                  legend.title = element_blank(),
                  legend.text = element_text(size=10),
@@ -159,35 +169,10 @@ plot <- (ggplot(joined_dta)
 
 
 
-ggplotly(plot, tooltip=c("common", "label")) %>% layout(legend=list(x=0.78, y=0.15)) %>% layout(hovermode = "closest")
-
-####################################################
-
-## Next step: tweak the import code for hacking data together. 
-## It is not working properly right now.
-
-#There may be a way to simplify this...
-
-##Numbers for both genders
-bothsexes <- (source_renamed %>% gather(c(9:18), key="Industry", value="TotalGenderCount") 
-              %>% filter(GeoName!="Canada")
-              %>% filter(Age=="All ages, 15-plus")
-              %>% filter(Sex== "Both sexes")
-              %>% dplyr::select(-c("Geographic code", "Sex", "Global non-response rate", "Data quality flag"))
+(ggplotly(plot, tooltip=c("common", "label1", "label2", "label3", "label4")) 
+  %>% layout(legend=list(x=0.78, y=0.15), hovermode = "closest") 
 )
 
-##Numbers for females only
-females <- (source_renamed %>% gather(c(9:18), key="Industry", value="FemaleGenderCount") 
-            %>% filter(GeoName!="Canada")
-            %>% filter(Age=="All ages, 15-plus")
-            %>% filter(Sex== "Female")
-            %>% dplyr::select(-c("Geographic code", "Sex", "AreaTotal", "Global non-response rate", "Data quality flag"))
-)
 
-##Recombine Tables and Calculate Female Proportions
-##Filter out Most Frequent Industries per Jurastiction
-femaleprop <- (left_join(bothsexes,females) 
-               %>% mutate(FemalePercent = round(100*(FemaleGenderCount/TotalGenderCount), digits=0))
-)
-
-####################################################
+## Next step???
+## Seems fairly complete for the most part
