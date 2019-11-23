@@ -14,6 +14,7 @@ library(broom)
 library(gganimate)
 library(RColorBrewer)
 library(plotly)
+library(forcats)
 
 #Geospatial data related packages
 library(maps)
@@ -24,10 +25,13 @@ library(sf)
 library(geogrid)
 library(htmlwidgets)
 library(rgdal) #This seems to work better for me than sf for reading shape files when they need to be re-projected
+devtools::install_github("yutannihilation/ggsflabel")
+library(ggsflabel)
+library(cartogram)
 
 #Current figure is gender breakdown by region and industry
 #Create multiple facet plots in question
-#Interactive element omitted - too difficult.
+#Can add more stuff as needed
 
 ##Download and Read zip file into local director
 ## Next step is to redirect it into a neater folder... sorry about that
@@ -38,18 +42,18 @@ download.file("https://www12.statcan.gc.ca/census-recensement/2016/dp-pd/hlt-fst
 ## Drop useless columns and NA rows
 source <- read_csv(unzip("statscan.zip", "98-402-X2016010-T4-CANPR-eng.csv")) 
 source_renamed <- (source %>% rename("GeoName"="Geographic name", 
-                                   "AreaTotal"="Total – STEM and BHASE (non-STEM) groupings - Classification of Instructional Programs (CIP) 2016 (2016 counts)",
-                                   "SciTech"="STEM fields of study - Science and science technology (2016 counts)",
-                                   "EngTech"="STEM fields of study - Engineering and engineering technology (2016 counts)",
-                                   "MathCS"="STEM fields of study - Mathematics and computer and information science (2016 counts)",
-                                   "BizAdmin"="BHASE (non-STEM) fields of study - Business and administration (2016 counts)",
-                                   "Artsy"="BHASE (non-STEM) fields of study - Arts and humanities (2016 counts)",
-                                   "SocSci"="BHASE (non-STEM) fields of study - Social and behavioural sciences (2016 counts)",
-                                   "Legal"="BHASE (non-STEM) fields of study - Legal professions and studies (2016 counts)",
-                                   "Health"="BHASE (non-STEM) fields of study - Health care (2016 counts)",
-                                   "EdTeach"="BHASE (non-STEM) fields of study - Education and teaching (2016 counts)",
-                                   "Trade"="BHASE (non-STEM) fields of study - Trades, services, natural resources and conservation (2016 counts)",
-                                   "TotalPercent"="Total – STEM and BHASE (non-STEM) groupings - Classification of Instructional Programs (CIP) 2016 (% distribution 2016)"
+                                     "AreaTotal"="Total – STEM and BHASE (non-STEM) groupings - Classification of Instructional Programs (CIP) 2016 (2016 counts)",
+                                     "SciTech"="STEM fields of study - Science and science technology (2016 counts)",
+                                     "EngTech"="STEM fields of study - Engineering and engineering technology (2016 counts)",
+                                     "MathCS"="STEM fields of study - Mathematics and computer and information science (2016 counts)",
+                                     "BizAdmin"="BHASE (non-STEM) fields of study - Business and administration (2016 counts)",
+                                     "Artsy"="BHASE (non-STEM) fields of study - Arts and humanities (2016 counts)",
+                                     "SocSci"="BHASE (non-STEM) fields of study - Social and behavioural sciences (2016 counts)",
+                                     "Legal"="BHASE (non-STEM) fields of study - Legal professions and studies (2016 counts)",
+                                     "Health"="BHASE (non-STEM) fields of study - Health care (2016 counts)",
+                                     "EdTeach"="BHASE (non-STEM) fields of study - Education and teaching (2016 counts)",
+                                     "Trade"="BHASE (non-STEM) fields of study - Trades, services, natural resources and conservation (2016 counts)",
+                                     "TotalPercent"="Total – STEM and BHASE (non-STEM) groupings - Classification of Instructional Programs (CIP) 2016 (% distribution 2016)"
 )
 %>% drop_na()
 %>% dplyr::select(-c(19:29)))
@@ -60,24 +64,24 @@ source_renamed <- (source %>% rename("GeoName"="Geographic name",
 
 ##Numbers for both genders
 bothsexes <- (source_renamed %>% gather(c(9:18), key="Industry", value="TotalGenderCount") 
-%>% filter(GeoName!="Canada")
-%>% filter(Age=="All ages, 15-plus")
-%>% filter(Sex== "Both sexes")
-%>% dplyr::select(-c("Geographic code", "Sex", "Global non-response rate", "Data quality flag"))
+              %>% filter(GeoName!="Canada")
+              %>% filter(Age=="All ages, 15-plus")
+              %>% filter(Sex== "Both sexes")
+              %>% dplyr::select(-c("Geographic code", "Sex", "Global non-response rate", "Data quality flag"))
 )
 
 ##Numbers for females only
 females <- (source_renamed %>% gather(c(9:18), key="Industry", value="FemaleGenderCount") 
-%>% filter(GeoName!="Canada")
-%>% filter(Age=="All ages, 15-plus")
-%>% filter(Sex== "Female")
-%>% dplyr::select(-c("Geographic code", "Sex", "AreaTotal", "Global non-response rate", "Data quality flag"))
+            %>% filter(GeoName!="Canada")
+            %>% filter(Age=="All ages, 15-plus")
+            %>% filter(Sex== "Female")
+            %>% dplyr::select(-c("Geographic code", "Sex", "AreaTotal", "Global non-response rate", "Data quality flag"))
 )
 
 ##Recombine Tables and Calculate Female Proportions
 ##Filter out Most Frequent Industries per Jurastiction
 femaleprop <- (left_join(bothsexes,females) 
-               %>% mutate(FemalePercent = 100*(FemaleGenderCount/TotalGenderCount))
+               %>% mutate(FemalePercent = round(100*(FemaleGenderCount/TotalGenderCount), digits=0))
 )
 
 ####################################################
@@ -96,41 +100,51 @@ Master <- (femaleprop %>% filter(Education=="Master's degree")
            %>% group_by(GeoName) %>% slice(which.max(TotalGenderCount)))
 PhD <- (femaleprop %>% filter(Education=="Earned doctorate")
         %>% group_by(GeoName) %>% slice(which.max(TotalGenderCount)))
- 
-dtafin <- bind_rows(College, UniCert, Bach, Master, PhD, id=NULL)
- 
+
+#Final Cleaned Data Table
+dtafin <- (bind_rows(College, UniCert, Bach, Master, PhD, id=NULL))
+               
+
 ## Load Shape File, Join Shape File with Data (it works reasonably now even on my laptop)
 ## Major change is the shape file used - less precise but reduces render time to seconds from minutes
 canada_shape <- st_read("Shape Files/Digital Boundary/lpr_000a16a_e.shp")
-joined_dta <- left_join(canada_shape, dtafin, by=c("PRENAME"="GeoName"))
+joined_dta <- left_join(canada_shape, dtafin, by=c("PRENAME"="GeoName")) %>% dplyr::rename("Jurisdiction"="PRENAME")
 
-
-##SciTech_Male
-
-#Changed plot, forgot to update this part
-#Will fill in sometime tomorrow
-
-#p3 <- spTransform(canada_shape, CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs")) 
-#tidydta <- tidy(p3, group=group)
-
-(ggplot(joined_dta)
-  + geom_sf(aes(fill=Industry, geometry=geometry, alpha=FemalePercent))
-  + scale_fill_viridis(name = "Industry", discrete=TRUE, option="plasma")
-  + scale_alpha_continuous(name = "Percent Female", range=c(0.5, 1))
-  + xlab("Longitude")
-  + ylab("Latitude")
-  + facet_wrap(~Education)
-  + theme_classic()
-  + theme(legend.position=c(0.83, 0.25), 
-          panel.spacing = unit(0.5, "lines"),
-          axis.text = element_text(size=12),
-          legend.title = element_text(size=10),
-          legend.text = element_text(size=10),
-          axis.title.x = element_text(size=10),
-          axis.title.y = element_text(size=10),
-          strip.text.x = element_text(size=10),)
+##Change strip text names without renaming data
+Facet_names <- c(
+  `College, CEGEP or other non-university certificate or diploma` = "College and Other Non-University",
+  `University certificate, diploma or degree at bachelor level or above` = "University Certificate (Minimum Bachelor's Level)",
+  `Bachelor's degree` = "Bachelor's degree",
+  `Master's degree` = "Master's degree",
+  `Earned doctorate` = "Earned doctorate"
 )
 
-## Next steps:
 
-## Possible breakdown by major metropolitan areas
+
+##Updated Plot with Interactive Hover
+##Trick is to use dummy aesthetics to display info in joined table
+
+plot <- (ggplot(joined_dta)
+         + geom_sf(aes(common=Jurisdiction, fill=Industry, label=FemalePercent, geometry=geometry))
+         + scale_fill_viridis(name = "Background", discrete=TRUE, option="plasma")
+         + xlab("Longitude")
+         + ylab("Latitude")
+         + facet_wrap(~Education, labeller = as_labeller(Facet_names))
+         + theme_classic()
+         + guides(alpha=FALSE)
+         + theme(legend.position=c(0.83, 0.25), 
+                 panel.spacing = unit(0.5, "lines"),
+                 axis.text = element_text(size=10),
+                 legend.title = element_text(size=10),
+                 legend.text = element_text(size=10),
+                 axis.title.x = element_text(size=10),
+                 axis.title.y = element_text(size=10),
+                 strip.text.x = element_text(size=10),)
+)
+
+
+
+ggplotly(plot, tooltip=c("common", "label")) %>% layout(legend=list(x=0.78, y=0.15))
+
+
+## Next step: update text and if possible, hover settings. They are fickle right now.
