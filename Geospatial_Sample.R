@@ -7,7 +7,6 @@ theme_update(panel.spacing = grid::unit(0, "lines"))
 library(directlabels)
 library(cowplot)
 library(scales)
-library(MASS)
 library(splines)
 library(viridis)
 library(broom)
@@ -41,47 +40,62 @@ download.file("https://www12.statcan.gc.ca/census-recensement/2016/dp-pd/hlt-fst
 ## Many, many columns to rename...
 ## Drop useless columns and NA rows
 source <- read_csv(unzip("statscan.zip", "98-402-X2016010-T4-CANPR-eng.csv")) 
+wages <- read_csv("wageData.csv")
 source_renamed <- (source %>% rename("GeoName"="Geographic name", 
                                      "AreaTotal"="Total – STEM and BHASE (non-STEM) groupings - Classification of Instructional Programs (CIP) 2016 (2016 counts)",
-                                     "SciTech"="STEM fields of study - Science and science technology (2016 counts)",
-                                     "EngTech"="STEM fields of study - Engineering and engineering technology (2016 counts)",
-                                     "MathCS"="STEM fields of study - Mathematics and computer and information science (2016 counts)",
-                                     "BizAdmin"="BHASE (non-STEM) fields of study - Business and administration (2016 counts)",
-                                     "Artsy"="BHASE (non-STEM) fields of study - Arts and humanities (2016 counts)",
-                                     "SocSci"="BHASE (non-STEM) fields of study - Social and behavioural sciences (2016 counts)",
-                                     "Legal"="BHASE (non-STEM) fields of study - Legal professions and studies (2016 counts)",
-                                     "Health"="BHASE (non-STEM) fields of study - Health care (2016 counts)",
-                                     "EdTeach"="BHASE (non-STEM) fields of study - Education and teaching (2016 counts)",
-                                     "Trade"="BHASE (non-STEM) fields of study - Trades, services, natural resources and conservation (2016 counts)",
+                                     "Science and science technology"="STEM fields of study - Science and science technology (2016 counts)",
+                                     "Engineering and engineering technology"="STEM fields of study - Engineering and engineering technology (2016 counts)",
+                                     "Mathematics and computer and information science"="STEM fields of study - Mathematics and computer and information science (2016 counts)",
+                                     "Business and administration"="BHASE (non-STEM) fields of study - Business and administration (2016 counts)",
+                                     "Arts and humanities"="BHASE (non-STEM) fields of study - Arts and humanities (2016 counts)",
+                                     "Social and behavioural sciences"="BHASE (non-STEM) fields of study - Social and behavioural sciences (2016 counts)",
+                                     "Legal professions and studies"="BHASE (non-STEM) fields of study - Legal professions and studies (2016 counts)",
+                                     "Health care"="BHASE (non-STEM) fields of study - Health care (2016 counts)",
+                                     "Education and teaching"="BHASE (non-STEM) fields of study - Education and teaching (2016 counts)",
+                                     "Trades, services, natural resources and conservation"="BHASE (non-STEM) fields of study - Trades, services, natural resources and conservation (2016 counts)",
                                      "TotalPercent"="Total – STEM and BHASE (non-STEM) groupings - Classification of Instructional Programs (CIP) 2016 (% distribution 2016)"
 )
 %>% drop_na()
-%>% dplyr::select(-c(19:29)))
+%>% dplyr::select(-c(19:29))
+%>% filter(GeoName!="Canada")
+%>% filter(Age=="All ages, 15-plus")
+%>% dplyr::select(-c("Geographic code", "Age", "Global non-response rate", "Data quality flag"))
+)
 
+
+
+merged <- (source_renamed %>% gather(c(5:14), key="Industry", value="CountByIndustry") 
+%>% left_join(wages))
 ###############################################
 
 #There may be a way to simplify this...
 
 ##Numbers for both genders
-bothsexes <- (source_renamed %>% gather(c(9:18), key="Industry", value="TotalGenderCount") 
-              %>% filter(GeoName!="Canada")
-              %>% filter(Age=="All ages, 15-plus")
+bothsexes <- (merged
               %>% filter(Sex== "Both sexes")
-              %>% dplyr::select(-c("Geographic code", "Sex", "Global non-response rate", "Data quality flag"))
+              %>% rename("Median Income (Both Genders)"="Median Income")
+              %>% dplyr::select(-c("Sex"))
 )
 
 ##Numbers for females only
-females <- (source_renamed %>% gather(c(9:18), key="Industry", value="FemaleGenderCount") 
-            %>% filter(GeoName!="Canada")
-            %>% filter(Age=="All ages, 15-plus")
+females <- (merged
             %>% filter(Sex== "Female")
-            %>% dplyr::select(-c("Geographic code", "Sex", "AreaTotal", "Global non-response rate", "Data quality flag"))
+            %>% rename("Median Income (Female)"="Median Income",
+                       "FemaleGenderCount"="CountByIndustry")
+            %>% dplyr::select(-c("Sex"))
+)
+
+##Numbers for males only
+males <- (merged
+            %>% filter(Sex== "Male")
+            %>% rename("Median Income (Male)"="Median Income")
+          %>% dplyr::select(-c("CountByIndustry", "Sex"))
 )
 
 ##Recombine Tables and Calculate Female Proportions
 ##Filter out Most Frequent Industries per Jurastiction
-femaleprop <- (left_join(bothsexes,females) 
-               %>% mutate(FemalePercent = round(100*(FemaleGenderCount/TotalGenderCount), digits=0))
+femaleprop <- (left_join(bothsexes,females) %>% left_join(males)
+               %>% mutate(FemalePercent = round(100*(FemaleGenderCount/CountByIndustry), digits=0))
 )
 
 ####################################################
@@ -113,7 +127,7 @@ joined_dta <- left_join(canada_shape, dtafin, by=c("PRENAME"="GeoName")) %>% dpl
 ##Change strip text names without renaming data
 Facet_names <- c(
   `College, CEGEP or other non-university certificate or diploma` = "College and Other Non-University",
-  `University certificate, diploma or degree at bachelor level or above` = "University Certificate (Minimum Bachelor's Level)",
+  `University certificate, diploma or degree at bachelor level or above` = "University Certificate, Diploma or Degree",
   `Bachelor's degree` = "Bachelor's degree",
   `Master's degree` = "Master's degree",
   `Earned doctorate` = "Earned doctorate"
@@ -126,7 +140,7 @@ Facet_names <- c(
 
 plot <- (ggplot(joined_dta)
          + geom_sf(aes(common=Jurisdiction, fill=Industry, label=FemalePercent, geometry=geometry))
-         + scale_fill_viridis(name = "Background", discrete=TRUE, option="plasma")
+         + scale_fill_viridis(discrete=TRUE, option="plasma")
          + xlab("Longitude")
          + ylab("Latitude")
          + facet_wrap(~Education, labeller = as_labeller(Facet_names))
@@ -135,7 +149,8 @@ plot <- (ggplot(joined_dta)
          + theme(legend.position=c(0.83, 0.25), 
                  panel.spacing = unit(0.5, "lines"),
                  axis.text = element_text(size=10),
-                 legend.title = element_text(size=10),
+                 axis.ticks=element_blank(),
+                 legend.title = element_blank(),
                  legend.text = element_text(size=10),
                  axis.title.x = element_text(size=10),
                  axis.title.y = element_text(size=10),
@@ -144,7 +159,35 @@ plot <- (ggplot(joined_dta)
 
 
 
-ggplotly(plot, tooltip=c("common", "label")) %>% layout(legend=list(x=0.78, y=0.15))
+ggplotly(plot, tooltip=c("common", "label")) %>% layout(legend=list(x=0.78, y=0.15)) %>% layout(hovermode = "closest")
 
+####################################################
 
-## Next step: update text and if possible, hover settings. They are fickle right now.
+## Next step: tweak the import code for hacking data together. 
+## It is not working properly right now.
+
+#There may be a way to simplify this...
+
+##Numbers for both genders
+bothsexes <- (source_renamed %>% gather(c(9:18), key="Industry", value="TotalGenderCount") 
+              %>% filter(GeoName!="Canada")
+              %>% filter(Age=="All ages, 15-plus")
+              %>% filter(Sex== "Both sexes")
+              %>% dplyr::select(-c("Geographic code", "Sex", "Global non-response rate", "Data quality flag"))
+)
+
+##Numbers for females only
+females <- (source_renamed %>% gather(c(9:18), key="Industry", value="FemaleGenderCount") 
+            %>% filter(GeoName!="Canada")
+            %>% filter(Age=="All ages, 15-plus")
+            %>% filter(Sex== "Female")
+            %>% dplyr::select(-c("Geographic code", "Sex", "AreaTotal", "Global non-response rate", "Data quality flag"))
+)
+
+##Recombine Tables and Calculate Female Proportions
+##Filter out Most Frequent Industries per Jurastiction
+femaleprop <- (left_join(bothsexes,females) 
+               %>% mutate(FemalePercent = round(100*(FemaleGenderCount/TotalGenderCount), digits=0))
+)
+
+####################################################
