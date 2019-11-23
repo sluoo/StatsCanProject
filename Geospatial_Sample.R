@@ -24,8 +24,6 @@ library(sf)
 library(geogrid)
 library(htmlwidgets)
 library(rgdal) #This seems to work better for me than sf for reading shape files when they need to be re-projected
-devtools::install_github("yutannihilation/ggsflabel")
-library(ggsflabel)
 library(cartogram)
 
 ##Facet plot for gender breakdown by Industry
@@ -33,17 +31,17 @@ library(cartogram)
 
 ####################################################
 
-##Download Original Zip File for Industry by Gender
-download.file("https://www12.statcan.gc.ca/census-recensement/2016/dp-pd/hlt-fst/edu-sco/Tables/Files/98-402-X2016010-T4-csv-eng.zip", destfile="statscan.zip")
+##Download Original Zip File for Industry by Gender (Reminder only)
+##download.file("https://www12.statcan.gc.ca/census-recensement/2016/dp-pd/hlt-fst/edu-sco/Tables/Files/98-402-X2016010-T4-csv-eng.zip", destfile="Utility/statscan.zip")
 
 ##Wage Data File by Industry
 ##Custom extraction from original 6GB census data
-wages <- read_csv("wageData.csv")
+wages <- read_csv("Utility/wageData.csv")
 
 ## Unzip and read CSV for Industry by Gender (Note: Parsing failures are blank rows in the data)
 ## Many, many columns to rename...
 ## Drop useless columns and NA rows
-source <- read_csv(unzip("statscan.zip", "98-402-X2016010-T4-CANPR-eng.csv")) 
+source <- read_csv("Utility/98-402-X2016010-T4-CANPR-eng.csv") 
 source_renamed <- (source %>% rename("GeoName"="Geographic name", 
                                      "AreaTotal"="Total – STEM and BHASE (non-STEM) groupings - Classification of Instructional Programs (CIP) 2016 (2016 counts)",
                                      "Science and science technology"="STEM fields of study - Science and science technology (2016 counts)",
@@ -115,12 +113,15 @@ PhD <- (femaleprop %>% filter(Education=="Earned doctorate")
 
 #Final Cleaned Data Table
 dtafin <- (bind_rows(College, UniCert, Bach, Master, PhD, id=NULL))
-##Factor Education Column (do this at end with fewer rows to worry about)
+##Factor Education Column (essentially for facet reordering)
 dtafin$Education <- factor(dtafin$Education, levels = c("College, CEGEP or other non-university certificate or diploma",
                                                         "University certificate, diploma or degree at bachelor level or above",
                                                         "Bachelor's degree",
                                                         "Master's degree",
                                                         "Earned doctorate"), ordered = TRUE)             
+## If no Income data is available, replace value with "No Data"
+dtafin$`Median Income (Female)`[which(dtafin$`Median Income (Female)`==0)] <- "No Data"
+dtafin$`Median Income (Male)`[which(dtafin$`Median Income (Male)`==0)] <- "No Data"
 
 ####################################################
 
@@ -162,15 +163,20 @@ plot <- (ggplot(joined_dta)
                  axis.ticks=element_blank(),
                  legend.title = element_blank(),
                  legend.text = element_text(size=10),
-                 axis.title.x = element_text(size=10),
-                 axis.title.y = element_text(size=10),
+                 axis.title.x = element_blank(),
+                 axis.title.y = element_blank(),
                  strip.text.x = element_text(size=10),)
 )
 
 
 
 (ggplotly(plot, tooltip=c("common", "label1", "label2", "label3", "label4")) 
-  %>% layout(legend=list(x=0.78, y=0.15), hovermode = "closest") 
+  %>% add_annotations(text="Predominant Industry Based on Workforce Size",
+                      xref="paper", yref="paper",
+                      x=0.7, xanchor="left",
+                      y=0.42, yanchor="top",
+                      legendtitle=TRUE, showarrow=FALSE)
+  %>% layout(legend=list(x=0.7, y=0.15, yanchor="bottom"), hovermode = "closest") 
 )
 
 
