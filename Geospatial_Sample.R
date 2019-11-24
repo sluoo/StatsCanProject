@@ -63,7 +63,7 @@ source_renamed <- (source %>% rename("GeoName"="Geographic name",
 )
 
 ## Join wage data with demographic data
-merged <- (source_renamed %>% gather(c(5:14), key="Industry", value="WorkforceSize") 
+merged <- (source_renamed %>% gather(c(5:14), key="Industry", value="Cohort Size") 
 %>% left_join(wages))
 
 ##Numbers for both genders
@@ -77,7 +77,7 @@ bothsexes <- (merged
 females <- (merged
             %>% filter(Sex== "Female")
             %>% rename("Median Income (Female)"="Median Income",
-                       "FemaleGenderCount"="WorkforceSize")
+                       "FemaleGenderCount"="Cohort Size")
             %>% dplyr::select(-c("Sex", "AreaTotal"))
 )
 
@@ -85,14 +85,14 @@ females <- (merged
 males <- (merged
             %>% filter(Sex== "Male")
             %>% rename("Median Income (Male)"="Median Income")
-          %>% dplyr::select(-c("WorkforceSize", "Sex", "AreaTotal"))
+          %>% dplyr::select(-c("Cohort Size", "Sex", "AreaTotal"))
 )
 
 
 ##Recombine Tables and Calculate Female Proportions
 ##Filter out Most Frequent Industries per Jurastiction
 femaleprop <- (left_join(bothsexes,females) %>% left_join(males)
-               %>% mutate(FemalePercent = round(100*(FemaleGenderCount/WorkforceSize), digits=0))
+               %>% mutate(FemalePercent = round(100*(FemaleGenderCount/`Cohort Size`), digits=0))
 )
 
 ##Extract most common industry by education level, based on femaleprop table
@@ -101,15 +101,15 @@ femaleprop <- (left_join(bothsexes,females) %>% left_join(males)
 ##Not ideal but this level of striation requires some drastic measures to clean
 
 College <- (femaleprop %>% filter(Education=="College, CEGEP or other non-university certificate or diploma") 
-            %>% group_by(GeoName) %>% slice(which.max(WorkforceSize)))
+            %>% group_by(GeoName) %>% slice(which.max(`Cohort Size`)))
 UniCert <- (femaleprop %>% filter(Education=="University certificate, diploma or degree at bachelor level or above")
-            %>% group_by(GeoName) %>% slice(which.max(WorkforceSize)))
+            %>% group_by(GeoName) %>% slice(which.max(`Cohort Size`)))
 Bach <- (femaleprop %>% filter(Education=="Bachelor's degree")
-         %>% group_by(GeoName) %>% slice(which.max(WorkforceSize)))
+         %>% group_by(GeoName) %>% slice(which.max(`Cohort Size`)))
 Master <- (femaleprop %>% filter(Education=="Master's degree")
-           %>% group_by(GeoName) %>% slice(which.max(WorkforceSize)))
+           %>% group_by(GeoName) %>% slice(which.max(`Cohort Size`)))
 PhD <- (femaleprop %>% filter(Education=="Earned doctorate")
-        %>% group_by(GeoName) %>% slice(which.max(WorkforceSize)))
+        %>% group_by(GeoName) %>% slice(which.max(`Cohort Size`)))
 
 #Final Cleaned Data Table
 dtafin <- (bind_rows(College, UniCert, Bach, Master, PhD, id=NULL))
@@ -146,7 +146,7 @@ Facet_names <- c(
 
 plot <- (ggplot(joined_dta)
          + geom_sf(aes(common=Jurisdiction, 
-                       fill=Industry, label1=WorkforceSize, 
+                       fill=Industry, label1=`Cohort Size`, 
                        label2=FemalePercent, 
                        label3=`Median Income (Female)`,
                        label4=`Median Income (Male)`,
@@ -171,7 +171,7 @@ plot <- (ggplot(joined_dta)
 
 
 (ggplotly(plot, tooltip=c("common", "label1", "label2", "label3", "label4")) 
-  %>% add_annotations(text="Predominant Industry Based on Workforce Size",
+  %>% add_annotations(text="Predominant Field of Study for Workforce Cohort",
                       xref="paper", yref="paper",
                       x=0.7, xanchor="left",
                       y=0.42, yanchor="top",
