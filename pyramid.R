@@ -2,6 +2,7 @@ library(tidyverse)
 library(cansim)
 library(stringr)
 library(gganimate)
+library(sunburstR)
 
 dta <- get_cansim(1410005101) %>% normalize_cansim_values()
 
@@ -36,6 +37,9 @@ dta3 <- (mutate(dta2, `Job tenure` = fct_relevel(dta2$`Job tenure`,
                                                   "5 to 10 years",
                                                   "10 to 20 years",
                                                   "20 years plus"))))
+         #%>% mutate(PERCENT = (VALUE/sum(VALUE)*100)))
+
+
 
 
 #plot job tenure
@@ -67,6 +71,35 @@ g1 <- (g
        + ease_aes('linear'))
 
 animate(g1, fps = 2) #slower
+
+##I'm not sure if the plots above are very informative??
+## It's more interesting to see job tenure and age group together
+## rather than seperately 
+
+
+
+dta4 <- data.frame((dta3 
+                    %>% mutate(REF_DATE=factor(REF_DATE))
+                    %>% select(REF_DATE,`Sex`,`Job tenure`,`Age group`,VALUE)
+                    %>% unite(seq,REF_DATE:`Age group`,sep="-")
+                    %>% select(seq,VALUE)))
+
+
+
+#This plot is better for this dataset I think
+sund2b(dta4,
+       rootLabel = "Year",
+       colors = htmlwidgets::JS("d3.scaleOrdinal(d3.schemeCategory20b)"),
+       tooltip =  sund2bTooltip(followMouse = TRUE,
+          html = htmlwidgets::JS("
+function(nodedata, size, percent) {
+  return '<span style=\"font-weight: bold;\">' + nodedata.name + '</span>' + ' ' + size
+}
+    ")
+       ) 
+)
+
+
 
 
 
