@@ -49,6 +49,10 @@ p <- (ggplot(dta3, aes(x=fct_inorder(`Job tenure`),y=VALUE,fill=Sex))
       + scale_fill_brewer(palette = "Set1")
       + coord_flip()
       + theme_classic())
+
+print(p)
+
+#use geom_path and interpolation 
            
 
 g <- (ggplot(dta3, aes(x=fct_inorder(`Age group`),y=VALUE,fill=Sex)) 
@@ -87,7 +91,7 @@ dta4 <- data.frame((dta3
 
 
 #This plot is better for this dataset I think
-sund2b(dta4,
+sunplot <- sund2b(dta4,
        rootLabel = "Year",
        colors = htmlwidgets::JS("d3.scaleOrdinal(d3.schemeCategory20b)"),
        tooltip =  sund2bTooltip(followMouse = TRUE,
