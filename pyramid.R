@@ -33,75 +33,42 @@ dta3 <- (mutate(dta2, `Job tenure` = fct_relevel(dta2$`Job tenure`,
                                                 c("1 to 3 months",
                                                   "4 to 6 months",
                                                   "7 to 12 months",
-                                                  "1 to 5 years",
+                                                  "1 to 5 years",   
                                                   "5 to 10 years",
                                                   "10 to 20 years",
                                                   "20 years plus"))))
-         #%>% mutate(PERCENT = (VALUE/sum(VALUE)*100)))
-
-
-
 
 #plot job tenure
-p <- (ggplot(dta3, aes(x=fct_inorder(`Job tenure`),y=VALUE,fill=Sex)) 
+p <- print(ggplot(dta3, aes(x=fct_inorder(`Job tenure`),y=VALUE,fill=Sex)) 
       + geom_col(data= subset(dta2,Sex== "Males")) 
       + geom_col(data=subset(dta2, Sex== "Females"), aes(y=(VALUE)*-1))
       + scale_fill_brewer(palette = "Set1")
+      + scale_y_continuous(breaks = c(-3e+06,-2e+06,-1e+06,0,1e+06,2e+06,3e+06),
+                             label=c("3M","2M","1M","0","1M","2M","3M"))
+      + geom_text(aes(x= label=paste(VALUE," ")),hjust=3)
+      + annotate("text", x=1, y=1.5e+06, label="Males", size=4.5, color="#377eb8") 
+      + annotate("text", x=1, y=-1.5e+06, label="Females", size=4.5, color="#e41a1c")
       + coord_flip()
-      + theme_classic())
+      + labs(y="Population in Millions",x="Length of Employment",
+             subtitle = "Length of Employment in Canada (1971-2018)")
+      + theme_classic()
+      + theme(legend.position = "none"))
 
-print(p)
 
-#use geom_path and interpolation 
-           
-
-g <- (ggplot(dta3, aes(x=fct_inorder(`Age group`),y=VALUE,fill=Sex)) 
-      + geom_col(data= subset(dta2,Sex== "Males")) 
-      + geom_col(data=subset(dta2, Sex== "Females"), aes(y=(VALUE)*-1))
-      + scale_fill_brewer(palette = "Set2")
-      + coord_flip()
-      + theme_classic())
-
-p1 <- (p
+pyrPlot <- (p
        + labs(title = 'Year:{frame_time}')
        + transition_time(REF_DATE) 
        + ease_aes('linear'))
 
-animate(p1, fps = 2) #slower
+animate(pyrPlot,fps = 2, height= 500, width=600) #slower
 
-g1 <- (g
-       + labs(title = 'Year:{frame_time}')
-       + transition_time(REF_DATE) 
-       + ease_aes('linear'))
 
-animate(g1, fps = 2) #slower
-
-##I'm not sure if the plots above are very informative??
+##I'm not sure if the plot above is very informative??
 ## It's more interesting to see job tenure and age group together
 ## rather than seperately 
 
 
 
-dta4 <- data.frame((dta3 
-                    %>% mutate(REF_DATE=factor(REF_DATE))
-                    %>% select(REF_DATE,`Sex`,`Job tenure`,`Age group`,VALUE)
-                    %>% unite(seq,REF_DATE:`Age group`,sep="-")
-                    %>% select(seq,VALUE)))
-
-
-
-#This plot is better for this dataset I think
-sunplot <- sund2b(dta4,
-       rootLabel = "Year",
-       colors = htmlwidgets::JS("d3.scaleOrdinal(d3.schemeCategory20b)"),
-       tooltip =  sund2bTooltip(followMouse = TRUE,
-          html = htmlwidgets::JS("
-function(nodedata, size, percent) {
-  return '<span style=\"font-weight: bold;\">' + nodedata.name + '</span>' + ' ' + size
-}
-    ")
-       ) 
-)
 
 
 
