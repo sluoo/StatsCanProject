@@ -45,7 +45,6 @@ p <- print(ggplot(dta3, aes(x=fct_inorder(`Job tenure`),y=VALUE,fill=Sex))
       + scale_fill_brewer(palette = "Set1")
       + scale_y_continuous(breaks = c(-3e+06,-2e+06,-1e+06,0,1e+06,2e+06,3e+06),
                              label=c("3M","2M","1M","0","1M","2M","3M"))
-      + geom_text(aes(x= label=paste(VALUE," ")),hjust=3)
       + annotate("text", x=1, y=1.5e+06, label="Males", size=4.5, color="#377eb8") 
       + annotate("text", x=1, y=-1.5e+06, label="Females", size=4.5, color="#e41a1c")
       + coord_flip()
@@ -53,6 +52,12 @@ p <- print(ggplot(dta3, aes(x=fct_inorder(`Job tenure`),y=VALUE,fill=Sex))
              subtitle = "Length of Employment in Canada (1971-2018)")
       + theme_classic()
       + theme(legend.position = "none"))
+
+
+dot <- print(ggplot(dta3, aes(x=fct_inorder(`Job tenure`),y=VALUE))
+        + geom_dotplot())
+
+
 
 
 pyrPlot <- (p
