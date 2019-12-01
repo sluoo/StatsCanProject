@@ -57,4 +57,6 @@ dotPlot1 <- animate(dotPlot,fps = 3, height= 500,
 #slow down the movement of the dots 
 #change alpha parameter of shadow_trail? 
 #keep shadow_trail? I kinda like it,you can see the overall trend better
-
+#Now that I look at it more, this plot is a lot more informative 
+#than the other two. You can see more clearly the differences 
+#between the gender and the majority job tenure bracket/group
