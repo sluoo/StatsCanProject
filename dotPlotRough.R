@@ -60,3 +60,35 @@ dotPlot1 <- animate(dotPlot,fps = 3, height= 500,
 #Now that I look at it more, this plot is a lot more informative 
 #than the other two. You can see more clearly the differences 
 #between the gender and the majority job tenure bracket/group
+
+## Tony: Think this looks pretty good overall
+## Definitely agree to keep the shadow trail, I don't see any issues with the alpha
+## Bigggest thing that I would suggest is making the y-axis a log scale
+## I think we should force the jitter to be horizontal only 
+## (don't want vertical jitter to mess up values too much)
+## Top legend looks a bit redundant (value encoded in both size of bubble and axis?)
+## Making bubbles the same size would eliminate redundance and improve readability of the smaller values
+
+
+## I modified your animation to incorporate my feedback below, let me know what you think:
+
+h2 <- print(dta3 
+           %>% ggplot(aes(x=`Job tenure`,y=VALUE, size=0.1, color=`Age group`)) ## Fix size to a constant value
+           + geom_jitter(height=0) #Only jitter widths (we don't want to distort things too much)
+           + facet_grid(.~Sex) 
+           + theme(axis.text.x = element_text(angle = 60, hjust = 1))
+           + scale_y_continuous(trans="log10", labels=scales::comma)  #Add log scale for resolution near zero, force everything into US Standard notation 
+           + guides(size=FALSE)) #hide size legend (seems a bit redundant)
+
+dotPlot_log <- (h2
+            + labs(title = 'Year:{frame_time}')
+            + transition_time(REF_DATE) 
+            + ease_aes('linear')
+            + shadow_trail(alpha=0.3)
+            )
+
+dotPlot1_log <- animate(dotPlot_log,fps = 3, height= 600, 
+                    width=800) #renderer = av_renderer()) #slower
+
+
+#add a bit of width (4:3 aspect ratio is pretty standard for older stuff/projectors)
