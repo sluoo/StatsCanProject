@@ -171,7 +171,7 @@ plot <- (ggplot(joined_dta)
 
 
 (ggplotly(plot, tooltip=c("common", "label1", "label2", "label3", "label4")) 
-  %>% add_annotations(text="Predominant Field of Study for Workforce Cohort",
+  %>% add_annotations(text="Predominant Field for Workforce Cohort",
                       xref="paper", yref="paper",
                       x=0.7, xanchor="left",
                       y=0.42, yanchor="top",
