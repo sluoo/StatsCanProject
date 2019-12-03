@@ -1,0 +1,44 @@
+__________________________________________
+
+Part I: The Story Behind the Graphics
+__________________________________________
+
+For these graphics, we look to explore some basic characteristics about the Canadian labour market, such as the age, gender, industry, and how the pay situation has changed over time.
+
+Pyramid Plot
+One thing that we wished to explore was how long men and women tend to stay at their jobs, and how these trends have changed over time. To do so, we created an animated pyramid plot.
+
+Sunburst Plot
+
+Geospatial Facet Plot
+One topic that frequently comes up when people discuss labour data is the gender pay gap, which can generally be described as a discrepancy between how much men and women get paid for comparable work. Everyone has heard about the 70 cents to the dollar saying, but considering how people's pay differ depending on the industry and geography, it is beneficial to take a precursory glance at these sorts of variations to see how things actually work.
+
+To do so, we combined industry and wage data obtained from the 2016 Census into an interactive, multi-faceted geospatial plot, coloured by the predominant field for each cohort. Looking at each educational level separately, we see that:
+- At the College-level and below, business is the predominant field of study for all provinces and Yukon, and the trades/natural resources is the most common field in the NorthWest Territories and Nunavut.
+- At the University Certificate level, the most populus provinces in Canada (Ontario, Quebec, British Columbia and Alberta) have business as the most common field of study, with the rest of the provinces and territories having Education as the most common field.
+- At the Bachelor's degree level, Social sciences become the most common field in Ontario, British Columbia and the Yukon, and Business becomes the most common field of study in New Brunswick, but for all other provinces, the field of study remains the same as the University Certificate level.
+- Geographical Industry trends at the Master's degree level largely resemble those at the University Certificate level, with the exception of New Brunswick and Manitoba
+- At the Doctorate level, sciences are the single most common field of study in every province and territory; however, it is interesting to note that this is for the physical sciences (i.e. biology, chemistry, and physics), meaning that this does not include mathematics and computer sciences.
+
+Now that we have an idea of what the most common fields of study are in different provinces and territories, we can look at the gender balance within each of these fields as well as any gender pay gaps. They can be briefly summarized as follows:
+- Where Business and administration is the predominant field, females generally make up between 40 to 80 percent of that particular cohort, with the proportion of females generally declining as the education level goes up. There appears to be a universal gender pay gap across all provinces that goes anywhere between 7% (minimum value, in Prince Edward Island at the Bachelor's level) to around 24% (as observed in Alberta at the Master's degree level).
+- In provinces and territories where Education is the most common field of study, females make up at least 60% of that particular cohort. For people with Master's degrees, Nunavut and Prince Edward Island have slightly greater median pay levels for females than males, though the difference is very small. In other areas where education is the most common field, the median salary of males is greater than that of females, though this difference ranges from slight (Nova Scotia, Master's degree level) to substantial (e.g. Saskatchewan, University certificate level).
+- Science disciplines are the predominant field of study at the doctorate level across all genders. In all provinces, females make up between 30 to 45 percent of the Science PhD cohort, and with the exception of Nova Scotia, males have a greater median salary in all provinces than females. The territories have so few Sciences PhDs that with the exception of males in the Northwest Territories, Statistics Canada actually does not provide wage data. No inferences can be made for these regions given the small number of relevant individuals.
+- Social sciences are predominant at the Bachelor's degree level for  
+
+
+
+Overall, this graphic lends credibility to the belief that the gender pay gap exists across a variety of industries across all geographical regions, regardless of whether an industry is female-dominated, male-dominated, or gender balanced. However, the magnitude of observed gender paygaps tend to be variable
+
+
+One issue with this plot is the hover behaviour - currently, hover only really works when you 
+__________________________________________
+
+Part II: How the graphics were made
+__________________________________________
+
+The interactive geospatial facet plot was created through the combination of plotly machinery with a facet plot created using ggplot. 
+
+To get an idea of the gender pay gap in recent years, we examined two sets of data from the 2016 Census, one of which covered wages of individuals by gender and field of study, and one of which tallied the number of employees by various factors such as industry, gender, field of study and earned qualifications. These datasets were combined to make 
+
+The viridis "C" or "plasma" color scale was used for brightness and high contrast. Though the levels of the factors are not directional, they are 
