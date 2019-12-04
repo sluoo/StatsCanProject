@@ -3,6 +3,7 @@ library(cansim)
 library(stringr)
 library(gganimate)
 library(sunburstR)
+library(av)
 
 dta <- get_cansim(1410005101) %>% normalize_cansim_values()
 
@@ -45,19 +46,18 @@ p <- print(ggplot(dta3, aes(x=fct_inorder(`Job tenure`),y=VALUE,fill=Sex))
       + scale_fill_brewer(palette = "Set1")
       + scale_y_continuous(breaks = c(-3e+06,-2e+06,-1e+06,0,1e+06,2e+06,3e+06),
                              label=c("3M","2M","1M","0","1M","2M","3M"))
-      + annotate("text", x=1, y=1.5e+06, label="Males", size=4.5, color="#377eb8") 
-      + annotate("text", x=1, y=-1.5e+06, label="Females", size=4.5, color="#e41a1c")
+      + annotate("text", x=1, y=1.5e+06, label="Males", size=8, color="#377eb8") 
+      + annotate("text", x=1, y=-1.5e+06, label="Females", size=8, color="#e41a1c")
       + coord_flip()
-      + labs(y="Population in Millions",x="Length of Employment",
-             subtitle = "Length of Employment in Canada (1971-2018)")
+      + labs(y="Number of People in Millions",x="Length of Employment",
+             subtitle = "Job Tenure in Canada (1976-2018)")
       + theme_classic()
-      + theme(legend.position = "none"))
-
-
-dot <- print(ggplot(dta3, aes(x=fct_inorder(`Job tenure`),y=VALUE))
-        + geom_dotplot())
-
-
+      + theme(legend.position = "none",
+              axis.title.y = element_text(size=12,face="bold"),
+              axis.title.x = element_text(size=12,face="bold"),
+              plot.subtitle = element_text(size=14,face='bold',hjust = 0.5),
+              axis.text.x = element_text(size=10),
+              axis.text.y = element_text(size=10)))
 
 
 pyrPlot <- (p
@@ -65,13 +65,9 @@ pyrPlot <- (p
        + transition_time(REF_DATE) 
        + ease_aes('linear'))
 
-animate(pyrPlot,fps = 2, height= 500, width=600) #slower
-
-
-##I'm not sure if the plot above is very informative??
-## It's more interesting to see job tenure and age group together
-## rather than seperately 
-
+pyrPlot1 <- animate(pyrPlot,fps = 2, height= 450, width=800, 
+                    renderer = av_renderer()) #slower
+anim_save("output_pyramid.mp4", pyrPlot1)
 
 
 
