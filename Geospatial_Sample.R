@@ -1,13 +1,8 @@
 library(tidyverse)
 library(ggplot2)
-library(ggthemes)
-library(ggrepel)
 theme_classic()
 theme_update(panel.spacing = grid::unit(0, "lines"))
-library(directlabels)
-library(cowplot)
 library(scales)
-library(splines)
 library(viridis)
 library(broom)
 library(gganimate)
@@ -16,15 +11,10 @@ library(plotly)
 library(forcats)
 
 #Geospatial data related packages
-library(maps)
-library(raster)
-library(leaflet)
 library(ggmap)
 library(sf)
-library(geogrid)
 library(htmlwidgets)
 library(rgdal) #This seems to work better for me than sf for reading shape files when they need to be re-projected
-library(cartogram)
 
 ##Facet plot for gender breakdown by Industry
 ## Additional tooltips for Workforce size, male and female median annual wages
@@ -125,25 +115,21 @@ dtafin$`Median Income (Male)`[which(dtafin$`Median Income (Male)`==0)] <- "No Da
 
 ####################################################
 
-## Load Shape File, Join Shape File with Data (it works reasonably now even on my laptop)
-## Major change is the shape file used - less precise but reduces render time
+## Load Shape File, Join Shape File with Data 
+## Use digital boundary file for performance
 canada_shape <- st_read("Shape Files/Digital Boundary/lpr_000a16a_e.shp")
 joined_dta <- left_join(canada_shape, dtafin, by=c("PRENAME"="GeoName")) %>% dplyr::rename("Jurisdiction"="PRENAME")
 
 ##Change strip text names without renaming data
 Facet_names <- c(
-  `College, CEGEP or other non-university certificate or diploma` = "College and Other Non-University",
-  `University certificate, diploma or degree at bachelor level or above` = "University Certificate, Diploma or Degree",
+  `College, CEGEP or other non-university certificate or diploma` = "College and Other",
+  `University certificate, diploma or degree at bachelor level or above` = "University Certificate",
   `Bachelor's degree` = "Bachelor's degree",
   `Master's degree` = "Master's degree",
   `Earned doctorate` = "Earned doctorate"
 )
 
-
-
-##Updated Plot with Interactive Hover
-##Trick is to use dummy aesthetics to display info in joined table
-
+#Create ggplot with dummy aesthetics for later use
 plot <- (ggplot(joined_dta)
          + geom_sf(aes(common=Jurisdiction, 
                        fill=Industry, label1=`Cohort Size`, 
@@ -162,23 +148,22 @@ plot <- (ggplot(joined_dta)
                  axis.text = element_blank(),
                  axis.ticks=element_blank(),
                  legend.title = element_blank(),
-                 legend.text = element_text(size=10),
                  axis.title.x = element_blank(),
                  axis.title.y = element_blank(),
-                 strip.text.x = element_text(size=10),)
+                 )
 )
 
+##Choropleth with multiple tooltips
+##Trick is to use previously established dummy aesthetics to display info in joined table
 
-
-(ggplotly(plot, tooltip=c("common", "label1", "label2", "label3", "label4")) 
+htmlplot <- (ggplotly(plot, tooltip=c("common", "label1", "label2", "label3", "label4"), width=800, height=450) 
   %>% add_annotations(text="Predominant Field for Workforce Cohort",
                       xref="paper", yref="paper",
                       x=0.7, xanchor="left",
-                      y=0.42, yanchor="top",
+                      y=0.47, yanchor="top",
                       legendtitle=TRUE, showarrow=FALSE)
-  %>% layout(legend=list(x=0.7, y=0.15, yanchor="bottom"), hovermode = "closest") 
+  %>% layout(autosize=F, legend=list(x=0.7, y=0.025, yanchor="bottom"), hovermode = "closest") 
 )
 
-
-## Next step???
-## Seems fairly complete for the most part
+#Export to html file
+htmlwidgets::saveWidget(as_widget(htmlplot), "choropleth.html")
