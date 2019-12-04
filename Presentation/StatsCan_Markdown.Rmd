@@ -1,0 +1,45 @@
+---
+title: "Canada's Labour Market: Past and Present"
+author: "Sherry Luo and Tony Wang"
+date: "03/12/2019"
+output: 
+  ioslides_presentation: 
+    widescreen: false
+    smaller: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+```{r packages, message=FALSE, warning=FALSE, include=FALSE}
+library(shiny)
+```
+## Introduction
+
+This is an R Markdown presentation. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document.
+
+## Age Distribution
+
+- Pyramid Plot
+- Bullet 2
+- Bullet 3
+
+## Job tenure by Year, Age and Gender
+- Sunburst and Animated Dot Plots
+
+
+## Pay Gaps, Industry, and Geography
+
+- Faceted Choropleth
+- Bullet 2
+- Bullet 3
+
+## Pay Gaps, Industry, and Geography
+
+```{r geospatial, message=FALSE, warning=FALSE}
+includeHTML("Presentation/choropleth.html") 
+```
+
