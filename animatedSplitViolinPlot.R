@@ -33,7 +33,7 @@ geom_split_violin <- function(mapping = NULL, data = NULL, stat = "ydensity", po
 }
 
 #clean data to use
-da5v <- (dta3 
+dta5v <- (dta3 
           %>% select(REF_DATE, `Job tenure`, Sex, VALUE))
 
 violin <- print(dta5v %>% ggplot(aes(x=`Job tenure`,y=VALUE, fill=Sex))
@@ -45,7 +45,7 @@ vPlot <- (violin
             + labs(title = 'Year:{frame_time}')
             + transition_time(REF_DATE) 
             + ease_aes('linear'))
-ggsave(VPlot)
+
 
 animate(vPlot,fps = 2, height= 500, width=600) #slower
 
