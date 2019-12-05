@@ -57,31 +57,31 @@ dta4 <- data.frame((dta31
 
 
 
-sunplot <- sund2b(dta4,
-                  rootLabel = "Sex",
-                  colors = list(range=c("black", "#377EB8","#E41A1C", "orange", "#FF7F00", "#FFFF33", "#A65628", "#F781BF","#999999")),
-                  tooltip =  sund2bTooltip(followMouse = TRUE,
-                                           html = htmlwidgets::JS("
-function(nodedata, size, percent) {
-  return '<span style=\"font-weight: bold;\">' + nodedata.name + '</span>' + ' ' + size
-}
-    ")
-                  ) 
-)
+# sunplot <- sund2b(dta4,
+#                   rootLabel = "Sex",
+#                   colors = list(range=c("black", "#377EB8","#E41A1C", "orange", "#FF7F00", "#FFFF33", "#A65628", "#F781BF","#999999")),
+#                   tooltip =  sund2bTooltip(followMouse = TRUE,
+#                                            html = htmlwidgets::JS("
+# function(nodedata, size, percent) {
+#   return '<span style=\"font-weight: bold;\">' + nodedata.name + '</span>' + ' ' + size
+# }
+#     ")
+#                   ) 
+# )
 
-sunplot
 
-sunplot1 <- sund2b(dta4,
+
+sunplot1 <- print(sund2b(dta4,
                   rootLabel = "Sex",
                   colors = htmlwidgets::JS("d3.scaleOrdinal(d3.schemeCategory20b)"),
                   tooltip =  sund2bTooltip(followMouse = TRUE,
-                                           html = htmlwidgets::JS("
-function(nodedata, size, percent) {
+                                           html = htmlwidgets::JS("function(nodedata, size, percent) {
   return '<span style=\"font-weight: bold;\">' + nodedata.name + '</span>' + ' ' + size
 }
     ")
                   ) 
-)
+))
 
-sunplot1
+
+
 
