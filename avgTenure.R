@@ -23,7 +23,8 @@ dta1 <- (dta
 dta2 <- data.frame(dta1 
          %>% group_by(REF_DATE,Sex)
          %>% summarise(mean_tenure = mean(VALUE))
-         %>% mutate(Sex = fct_relevel(Sex, c("Males","Both sexes","Females"))))
+         %>% mutate(Sex = fct_relevel(Sex, c("Males","Both sexes","Females")))
+         %>% rename(Year=REF_DATE,AvgTenure=mean_tenure))
 
 # 
 # (dta2 %>% plot_ly(x = ~REF_DATE,
@@ -33,7 +34,7 @@ dta2 <- data.frame(dta1
 #                  type = "scatter",
 #                  mode = "lines+markers"))
 
-plot <- print(dta2 %>% ggplot(aes(x=REF_DATE,y=mean_tenure,color=Sex))
+plot <- print(dta2 %>% ggplot(aes(x=Year,y=AvgTenure,color=Sex))
               +geom_point()
               +geom_line()
               + labs(y="Average job tenure",x="Years",title = "Average job tenure in Canada by sex")
@@ -52,7 +53,8 @@ ggplotly(plot)
 
 dta3 <- data.frame(dta1 
          %>% group_by(REF_DATE,Sex,`Age group`)
-         %>% summarise(mean_tenure = mean(VALUE)))
+         %>% summarise(mean_tenure = mean(VALUE))
+         %>% rename(Year=REF_DATE,AvgTenure=mean_tenure))
 
 # #not good
 # (dta3 %>% plot_ly(x = ~REF_DATE,
@@ -67,7 +69,7 @@ dta4 <- (dta3 %>%
            filter(Sex !="Both sexes"))
 
 p <- print(dta4 %>% 
-             ggplot(aes(x=REF_DATE,y=mean_tenure,color=Age.group))
+             ggplot(aes(x=Year,y=AvgTenure,color=Age.group))
            + geom_point()
            + geom_line()
            + labs(y="Average job tenure",x="Years")
