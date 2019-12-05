@@ -5,7 +5,7 @@ date: "03/12/2019"
 output: 
   ioslides_presentation: 
     widescreen: false
-    smaller: true
+    smaller: false
 ---
 
 ```{r setup, include=FALSE}
@@ -44,8 +44,9 @@ When you click the **Knit** button a document will be generated that includes bo
 - Bullet 3
 
 ## Age Distribution Over Time
-
-
+<video width="750" height="450" controls>
+  <source src="output_pyramid.mp4" type="video/mp4">
+</video>
 
 ## Job tenure by Year, Age and Gender
 - Sunburst Plot
@@ -53,14 +54,20 @@ When you click the **Knit** button a document will be generated that includes bo
 ## Job tenure by Year, Age and Gender
 
 
-
+## Pay Gaps, Industry, and Geography
+* When talking about job data, one thing that frequently comes up is the gender wage gap
+* Common saying is that women get paid 70 cents for every dollar men get paid
+* Problem is that pay depends on many different factors
+* Among people with the same educational level and the same field of study, is there a major gender pay gap for different parts of Canada?
 
 ## Pay Gaps, Industry, and Geography
-- 2016 Census Data
-- Joining datasets
-- Faceted Choropleth
-- Bullet 2
-- Bullet 3
+* We combined two subsets of the 2016 Census Data
+  + Employment Income by Major Field of Study (98-400-X2016280)
+  + Field of Study Groupings for Age Groups, Sex, and educational attainment (98-402-X2016010-T4)
+* We then calculated the proportion of females in the workforce using the count data of each cohort
+* Cleaned data was used to create a faceted map
+* ggplotly was used to make the facet plot interactive
+* Tooltips of detailed information were added using "dummy" aesthetics in ggplot
 
 ## Pay Gaps, Industry, and Geography
 
@@ -231,3 +238,8 @@ plot <- (ggplot(joined_dta)
 )
 ```
 
+## Overall Conclusions
+* Canada's workforce:
+  + Has changed a lot over time demographically
+  +
+  + Exhibits a gender pay gap
