@@ -4,7 +4,7 @@ library(stringr)
 library(gganimate)
 library(sunburstR)
 
-dta <- get_cansim(1410005101) #%>% normalize_cansim_values()
+dta <- get_cansim(1410005101) %>% normalize_cansim_values()
 
 #CleanData 
 dta1 <- (dta
