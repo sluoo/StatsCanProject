@@ -24,14 +24,18 @@ library(gganimate)
 library(RColorBrewer)
 library(plotly)
 library(forcats)
+library(cansim)
 
 #Geospatial data related packages
 library(ggmap)
 library(sf)
 library(rgdal)
+library(stringr)
+
+#Animated and sunburst related packages 
 library(av)
 library(sunburstR)
-library(stringr)
+
 ```
 ## Introduction
 
@@ -57,28 +61,180 @@ When you click the **Knit** button a document will be generated that includes bo
   <source src="output_pyramid.mp4" type="video/mp4">
 </video>
 
-## An animated pyramid plot 
-- Impact of job tenure based on Canada's economy 
- + Generally, when the economy is stable, the number of short-term jobs increase and workers transition periods happen accordingly
- + During the financial crises of 1989 - 1992 and 2008 - 2012, workers with shorter tenure are hit the hardest and those with longer tenure maintain their position 
-    + This increase in tenure confirms that layoffs affect workers with lower seniority more compared to workers with higher seniority 
-=======
-## Age Distribution Over Time
+## Average job tenure in Canada by Sex 
 
-- Pyramid Plot
-- Bullet 2
-- Bullet 3
+```{r plotlyLine_setup, message=FALSE, warning=FALSE, include=FALSE}
 
-## Age Distribution Over Time
-<video width="750" height="450" controls>
-  <source src="output_pyramid.mp4" type="video/mp4">
-</video>
+dta <- get_cansim(1410005101) %>% normalize_cansim_values()
 
-## Job tenure by Year, Age and Gender
-- Sunburst Plot
+#CleanData 
+dta1 <- (dta
+         %>% select(REF_DATE,GEO,`Job tenure`,
+                    `Type of work`,Sex,`Age group`,VALUE)
+         %>% filter(GEO=="Canada",
+                    str_starts(`Job tenure`,"Average"),
+                    str_starts(`Type of work`,"Full"),
+                    str_detect(`Age group`, "to|65"),
+                    str_detect(`Age group`,"44",negate = TRUE))
+         %>% mutate(`Job tenure`=factor(`Job tenure`),Sex=factor(Sex),
+                    REF_DATE=as.numeric(REF_DATE),`Age group`=factor(`Age group`),
+                    VALUE=as.numeric(VALUE))
+         %>% drop_na())
 
-## Job tenure by Year, Age and Gender
->>>>>>> 0e536a56ac305ddffec574f1cb70124d4f309408
+dta2 <- data.frame(dta1 
+         %>% group_by(REF_DATE,Sex)
+         %>% summarise(mean_tenure = mean(VALUE))
+         %>% mutate(Sex = fct_relevel(Sex, c("Males","Both sexes","Females"))))
+
+# 
+# (dta2 %>% plot_ly(x = ~REF_DATE,
+#                  y = ~mean_tenure,
+#                  split = ~Sex,
+#                  #frame = ~REF_DATE,
+#                  type = "scatter",
+#                  mode = "lines+markers"))
+
+plot <- print(dta2 %>% ggplot(aes(x=REF_DATE,y=mean_tenure,color=Sex))
+              +geom_point()
+              +geom_line()
+              + labs(y="Average job tenure",x="Years",title = "Average job tenure in Canada by sex")
+              + theme_minimal()
+              + theme(title = element_text(size=10,face="bold"),
+                      axis.title.x = element_text(size = 10,
+                                                  face = "bold",vjust=0.2),
+                      axis.title.y = element_text(size=10,
+                                                  face="bold"),
+                      axis.text.x = element_text(face="bold"),
+                      axis.text.y = element_text(face="bold"))
+              + scale_color_manual(values = c("#377eb8","forestgreen","#e41a1c")))
+
+```
+
+```{r averagetenurebySex, echo=FALSE}
+ggplotly(plot) 
+
+```
+
+## Job Tenure categorized by Age and Gender 
+
+```{r plotlyLine1_setup, message=FALSE, warning=FALSE, include=FALSE}
+
+###Problem with this is that age groups are mixed in...seperate this
+
+dta3 <- data.frame(dta1 
+         %>% group_by(REF_DATE,Sex,`Age group`)
+         %>% summarise(mean_tenure = mean(VALUE)))
+
+# #not good
+# (dta3 %>% plot_ly(x = ~REF_DATE,
+#                   y = ~mean_tenure,
+#                   split = ~Age.group,
+#                   #frame = ~REF_DATE,
+#                   type = "scatter",
+#                   mode = "lines+markers"))
+
+#display age and facet gender 
+dta4 <- (dta3 %>% 
+           filter(Sex !="Both sexes"))
+
+p <- print(dta4 %>% 
+             ggplot(aes(x=REF_DATE,y=mean_tenure,color=Age.group))
+           + geom_point()
+           + geom_line()
+           + labs(y="Average job tenure",x="Years")
+           + theme_minimal()
+           + theme(legend.position = "none",
+                   axis.title.x = element_text(size = 10,
+                                               face = "bold",vjust=0.2),
+                   axis.title.y = element_text(size=10,
+                                               face="bold"),
+                   axis.text.x = element_text(face="bold"),
+                   axis.text.y = element_text(face="bold")))
+
+
+p1 <- print(p 
+            + facet_grid(.~Sex)
+            + theme(strip.text.x = element_text(size=10,face="bold"),
+                    strip.background = element_rect(fill="white")))
+
+
+```
+
+```{r averageTenure_Age_Gender, echo=FALSE}
+
+ggplotly(p1)
+
+```
+
+## A Sunburst Plot
+```{r sunburst_setup, message=FALSE, warning=FALSE, include=FALSE}
+dta <- get_cansim(1410005101) #%>% normalize_cansim_values()
+
+#CleanData 
+dta1 <- (dta
+         %>% select(REF_DATE,GEO,`Job tenure`,
+                    `Type of work`,Sex,`Age group`,VALUE)
+         %>% filter(GEO=="Canada",str_starts(`Job tenure`,"Total",negate = TRUE),
+                    str_starts(`Job tenure`,"Average",negate = TRUE),
+                    str_starts(`Type of work`,"Full"),
+                    Sex != "Both sexes",
+                    str_detect(`Age group`, "to|65"),
+                    str_detect(`Age group`,"44",negate = TRUE))
+         %>% mutate(`Job tenure`=factor(`Job tenure`),Sex=factor(Sex),
+                    REF_DATE=as.integer(REF_DATE),`Age group`=factor(`Age group`),
+                    VALUE=as.numeric(VALUE))
+         %>% drop_na())
+
+
+#Reorder the job tenure
+dta2 <- (mutate(dta1, `Job tenure` = fct_relevel(dta1$`Job tenure`,
+                                                 c("1 to 3 months",
+                                                   "4 to 6 months",
+                                                   "7 to 12 months",
+                                                   "13 to 60 months",
+                                                   "61 to 120 months",   
+                                                   "121 to 240 months",
+                                                  "241 months or more"))))
+
+#Recoding labels for clarity
+dta3 <- mutate(dta2, `Job tenure` = (dta2$`Job tenure`  
+                                     %>% fct_recode(`Job Tenure: 1 to 3 months`="1 to 3 months",
+                                                    `Job Tenure: 4 to 6 months` ="4 to 6 months",
+                                                    `Job Tenure: 7 to 12 months`="7 to 12 months",
+                                                    `Job Tenure: 1 to 5 years`="13 to 60 months",
+                                                    `Job Tenure: 5 to 10 years`="61 to 120 months",
+                                                    `Job Tenure: 10 to 20 years`="121 to 240 months",
+                                                    `Job Tenure: 20 years plus`= "241 months or more")))
+
+dta31 <- mutate(dta3, `Age group`= (dta3$`Age group` 
+                            %>% fct_recode(`Age Group: 15 to 24 years`="15 to 24 years",
+                            `Age Group: 25 to 54 years` = "25 to 54 years",
+                            `Age Group: 55 to 64 years`="55 to 64 years",
+                            `Age Group: 65 years and over`="65 years and over")))
+
+
+dta4 <- data.frame((dta31 
+                    %>% mutate(REF_DATE=factor(REF_DATE))
+                    %>% select(`Sex`,`Job tenure`,REF_DATE,`Age group`,VALUE)
+                    %>% unite(seq,`Sex`:`Age group`,sep="-")
+                    %>% select(seq,VALUE)))
+```
+
+```{r sunburstPlot, echo=FALSE}
+sunplot1 <- print(sund2b(dta4,
+                  rootLabel = "Sex",
+                  colors = htmlwidgets::JS("d3.scaleOrdinal(d3.schemeCategory20b)"),
+                  tooltip =  sund2bTooltip(followMouse = TRUE,
+                                           html = htmlwidgets::JS("
+function(nodedata, size, percent) {
+  return '<span style=\"font-weight: bold;\">' + nodedata.name + '</span>' + ' ' + size
+}
+    ")
+                  ) 
+))
+
+```
+
 
 
 ## Pay Gaps, Industry, and Geography
