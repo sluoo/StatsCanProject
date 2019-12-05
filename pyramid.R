@@ -2,7 +2,6 @@ library(tidyverse)
 library(cansim)
 library(stringr)
 library(gganimate)
-library(sunburstR)
 library(av)
 
 dta <- get_cansim(1410005101) %>% normalize_cansim_values()

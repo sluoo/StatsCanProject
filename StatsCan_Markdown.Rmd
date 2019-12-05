@@ -28,8 +28,10 @@ library(forcats)
 #Geospatial data related packages
 library(ggmap)
 library(sf)
-library(htmlwidgets)
 library(rgdal)
+library(av)
+library(sunburstR)
+library(stringr)
 ```
 ## Introduction
 
@@ -37,20 +39,28 @@ This is an R Markdown presentation. Markdown is a simple formatting syntax for a
 
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document.
 
-## Age Distribution Over Time
+## Job Tenure of Canada
+- Based on job tenure data from Statistics Canada, we wish to explore how the length of employment varied among men and women over the period of 1976 to 2018.
+-	Job tenure is defined as the length of time a work has been continuously employed by the same employer and is not affected if an employee changes position within the same company
+-	For this exploratory analysis, we created two animated plots and one sunburst plot.
 
-- Pyramid Plot
-- Bullet 2
-- Bullet 3
+## An animated pyramid plot 
+ - The animated pyramid plot illustrates the evolution of tenure according to gender from 1976 to 2018. 
+ - We categorized the brackets into 3 categories: 
+    +	Short term (1 to 12 months) 
+    +	Intermediate (1 to 5 years) 
+    +	Longer-term (over 5 years)
 
-## Age Distribution Over Time
+## An animated pyramid plot
+<video width="320" height="240" controls>
+  <source src="output_pyramid.mp4" type="video/mp4">
+</video>
 
-
-
-## Job tenure by Year, Age and Gender
-- Sunburst Plot
-
-## Job tenure by Year, Age and Gender
+## An animated pyramid plot 
+- Impact of job tenure based on Canada's economy 
+ + Generally, when the economy is stable, the number of short-term jobs increase and workers transition periods happen accordingly
+ + During the financial crises of 1989 - 1992 and 2008 - 2012, workers with shorter tenure are hit the hardest and those with longer tenure maintain their position 
+    + This increase in tenure confirms that layoffs affect workers with lower seniority more compared to workers with higher seniority 
 
 
 

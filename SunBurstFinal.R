@@ -51,14 +51,28 @@ dta31 <- mutate(dta3, `Age group`= (dta3$`Age group`
 
 dta4 <- data.frame((dta31 
                     %>% mutate(REF_DATE=factor(REF_DATE))
-                    %>% select(REF_DATE,`Sex`,`Job tenure`,`Age group`,VALUE)
-                    %>% unite(seq,REF_DATE:`Age group`,sep="-")
+                    %>% select(`Sex`,`Job tenure`,REF_DATE,`Age group`,VALUE)
+                    %>% unite(seq,`Sex`:`Age group`,sep="-")
                     %>% select(seq,VALUE)))
 
 
 
 sunplot <- sund2b(dta4,
-                  rootLabel = "Year",
+                  rootLabel = "Sex",
+                  colors = list(range=c("black", "#377EB8","#E41A1C", "orange", "#FF7F00", "#FFFF33", "#A65628", "#F781BF","#999999")),
+                  tooltip =  sund2bTooltip(followMouse = TRUE,
+                                           html = htmlwidgets::JS("
+function(nodedata, size, percent) {
+  return '<span style=\"font-weight: bold;\">' + nodedata.name + '</span>' + ' ' + size
+}
+    ")
+                  ) 
+)
+
+sunplot
+
+sunplot1 <- sund2b(dta4,
+                  rootLabel = "Sex",
                   colors = htmlwidgets::JS("d3.scaleOrdinal(d3.schemeCategory20b)"),
                   tooltip =  sund2bTooltip(followMouse = TRUE,
                                            html = htmlwidgets::JS("
@@ -68,3 +82,6 @@ function(nodedata, size, percent) {
     ")
                   ) 
 )
+
+sunplot1
+
