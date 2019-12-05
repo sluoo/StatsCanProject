@@ -47,7 +47,7 @@ When you click the **Knit** button a document will be generated that includes bo
 
 
 ## An animated pyramid plot
-<video width="320" height="240" controls>
+<video width=750 height="450" controls>
   <source src="output_pyramid.mp4" type="video/mp4">
 </video>
 
