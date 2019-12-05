@@ -35,6 +35,7 @@ library(stringr)
 #Animated and sunburst related packages 
 library(av)
 library(sunburstR)
+library(d3r)
 
 ```
 ## Introduction
@@ -43,18 +44,7 @@ This is an R Markdown presentation. Markdown is a simple formatting syntax for a
 
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document.
 
-<<<<<<< HEAD
-## Job Tenure of Canada
-- Based on job tenure data from Statistics Canada, we wish to explore how the length of employment varied among men and women over the period of 1976 to 2018.
--	Job tenure is defined as the length of time a work has been continuously employed by the same employer and is not affected if an employee changes position within the same company
--	For this exploratory analysis, we created two animated plots and one sunburst plot.
 
-## An animated pyramid plot 
- - The animated pyramid plot illustrates the evolution of tenure according to gender from 1976 to 2018. 
- - We categorized the brackets into 3 categories: 
-    +	Short term (1 to 12 months) 
-    +	Intermediate (1 to 5 years) 
-    +	Longer-term (over 5 years)
 
 ## An animated pyramid plot
 <video width="320" height="240" controls>
@@ -84,7 +74,8 @@ dta1 <- (dta
 dta2 <- data.frame(dta1 
          %>% group_by(REF_DATE,Sex)
          %>% summarise(mean_tenure = mean(VALUE))
-         %>% mutate(Sex = fct_relevel(Sex, c("Males","Both sexes","Females"))))
+         %>% mutate(Sex = fct_relevel(Sex, c("Males","Both sexes","Females")))
+         %>% rename(Year=REF_DATE,AvgTenure=mean_tenure))
 
 # 
 # (dta2 %>% plot_ly(x = ~REF_DATE,
@@ -94,7 +85,7 @@ dta2 <- data.frame(dta1
 #                  type = "scatter",
 #                  mode = "lines+markers"))
 
-plot <- print(dta2 %>% ggplot(aes(x=REF_DATE,y=mean_tenure,color=Sex))
+plot <- print(dta2 %>% ggplot(aes(x=Year,y=AvgTenure,color=Sex))
               +geom_point()
               +geom_line()
               + labs(y="Average job tenure",x="Years",title = "Average job tenure in Canada by sex")
@@ -106,7 +97,7 @@ plot <- print(dta2 %>% ggplot(aes(x=REF_DATE,y=mean_tenure,color=Sex))
                                                   face="bold"),
                       axis.text.x = element_text(face="bold"),
                       axis.text.y = element_text(face="bold"))
-              + scale_color_manual(values = c("#377eb8","forestgreen","#e41a1c")))
+              + scale_color_manual(values = c("#377eb8","#f89441","#cc4678")))
 
 ```
 
@@ -115,7 +106,7 @@ ggplotly(plot)
 
 ```
 
-## Job Tenure categorized by Age and Gender 
+## Average job tenure by Age and Gender 
 
 ```{r plotlyLine1_setup, message=FALSE, warning=FALSE, include=FALSE}
 
@@ -123,7 +114,8 @@ ggplotly(plot)
 
 dta3 <- data.frame(dta1 
          %>% group_by(REF_DATE,Sex,`Age group`)
-         %>% summarise(mean_tenure = mean(VALUE)))
+         %>% summarise(mean_tenure = mean(VALUE))
+         %>% rename(Year=REF_DATE,AvgTenure=mean_tenure))
 
 # #not good
 # (dta3 %>% plot_ly(x = ~REF_DATE,
@@ -138,25 +130,25 @@ dta4 <- (dta3 %>%
            filter(Sex !="Both sexes"))
 
 p <- print(dta4 %>% 
-             ggplot(aes(x=REF_DATE,y=mean_tenure,color=Age.group))
+             ggplot(aes(x=Year,y=AvgTenure,color=Age.group))
            + geom_point()
            + geom_line()
            + labs(y="Average job tenure",x="Years")
            + theme_minimal()
-           + theme(legend.position = "none",
+           + theme(
                    axis.title.x = element_text(size = 10,
                                                face = "bold",vjust=0.2),
                    axis.title.y = element_text(size=10,
                                                face="bold"),
                    axis.text.x = element_text(face="bold"),
-                   axis.text.y = element_text(face="bold")))
+                   axis.text.y = element_text(face="bold"))
+           + scale_color_manual(values = c("#f89441","#cc4678","#7e03a8","#0d0887")))
 
 
 p1 <- print(p 
             + facet_grid(.~Sex)
             + theme(strip.text.x = element_text(size=10,face="bold"),
                     strip.background = element_rect(fill="white")))
-
 
 ```
 
@@ -168,7 +160,7 @@ ggplotly(p1)
 
 ## A Sunburst Plot
 ```{r sunburst_setup, message=FALSE, warning=FALSE, include=FALSE}
-dta <- get_cansim(1410005101) #%>% normalize_cansim_values()
+dta <- get_cansim(1410005101) %>% normalize_cansim_values()
 
 #CleanData 
 dta1 <- (dta
@@ -218,20 +210,22 @@ dta4 <- data.frame((dta31
                     %>% select(`Sex`,`Job tenure`,REF_DATE,`Age group`,VALUE)
                     %>% unite(seq,`Sex`:`Age group`,sep="-")
                     %>% select(seq,VALUE)))
+
 ```
 
-```{r sunburstPlot, echo=FALSE}
-sunplot1 <- print(sund2b(dta4,
+http://rpubs.com/sluoo/sunburst
+
+```{r sunburstPlot}
+sunplot1 <- sund2b(dta4,
                   rootLabel = "Sex",
                   colors = htmlwidgets::JS("d3.scaleOrdinal(d3.schemeCategory20b)"),
                   tooltip =  sund2bTooltip(followMouse = TRUE,
-                                           html = htmlwidgets::JS("
-function(nodedata, size, percent) {
+                                           html = htmlwidgets::JS("function(nodedata, size, percent) {
   return '<span style=\"font-weight: bold;\">' + nodedata.name + '</span>' + ' ' + size
-}
-    ")
-                  ) 
-))
+}")) 
+)
+
+sunplot1
 
 ```
 
