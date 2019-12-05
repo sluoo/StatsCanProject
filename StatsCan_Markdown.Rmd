@@ -5,7 +5,7 @@ date: "03/12/2019"
 output: 
   ioslides_presentation: 
     widescreen: false
-    smaller: true
+    smaller: false
 ---
 
 ```{r setup, include=FALSE}
@@ -39,6 +39,7 @@ This is an R Markdown presentation. Markdown is a simple formatting syntax for a
 
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document.
 
+<<<<<<< HEAD
 ## Job Tenure of Canada
 - Based on job tenure data from Statistics Canada, we wish to explore how the length of employment varied among men and women over the period of 1976 to 2018.
 -	Job tenure is defined as the length of time a work has been continuously employed by the same employer and is not affected if an employee changes position within the same company
@@ -61,16 +62,39 @@ When you click the **Knit** button a document will be generated that includes bo
  + Generally, when the economy is stable, the number of short-term jobs increase and workers transition periods happen accordingly
  + During the financial crises of 1989 - 1992 and 2008 - 2012, workers with shorter tenure are hit the hardest and those with longer tenure maintain their position 
     + This increase in tenure confirms that layoffs affect workers with lower seniority more compared to workers with higher seniority 
+=======
+## Age Distribution Over Time
 
+- Pyramid Plot
+- Bullet 2
+- Bullet 3
 
+## Age Distribution Over Time
+<video width="750" height="450" controls>
+  <source src="output_pyramid.mp4" type="video/mp4">
+</video>
+
+## Job tenure by Year, Age and Gender
+- Sunburst Plot
+
+## Job tenure by Year, Age and Gender
+>>>>>>> 0e536a56ac305ddffec574f1cb70124d4f309408
 
 
 ## Pay Gaps, Industry, and Geography
-- 2016 Census Data
-- Joining datasets
-- Faceted Choropleth
-- Bullet 2
-- Bullet 3
+* When talking about job data, one thing that frequently comes up is the gender wage gap
+* Common saying is that women get paid 70 cents for every dollar men get paid
+* Problem is that pay depends on many different factors
+* Among people with the same educational level and the same field of study, is there a major gender pay gap for different parts of Canada?
+
+## Pay Gaps, Industry, and Geography
+* We combined two subsets of the 2016 Census Data
+  + Employment Income by Major Field of Study (98-400-X2016280)
+  + Field of Study Groupings for Age Groups, Sex, and educational attainment (98-402-X2016010-T4)
+* We then calculated the proportion of females in the workforce using the count data of each cohort
+* Cleaned data was used to create a faceted map
+* ggplotly was used to make the facet plot interactive
+* Tooltips of detailed information were added using "dummy" aesthetics in ggplot
 
 ## Pay Gaps, Industry, and Geography
 
@@ -241,3 +265,8 @@ plot <- (ggplot(joined_dta)
 )
 ```
 
+## Overall Conclusions
+* Canada's workforce:
+  + Has changed a lot over time demographically
+  +
+  + Exhibits a gender pay gap
