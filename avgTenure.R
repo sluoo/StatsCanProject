@@ -45,7 +45,7 @@ plot <- print(dta2 %>% ggplot(aes(x=REF_DATE,y=mean_tenure,color=Sex))
                                                   face="bold"),
                       axis.text.x = element_text(face="bold"),
                       axis.text.y = element_text(face="bold"))
-              + scale_color_manual(values = c("#377eb8","forestgreen","#e41a1c")))
+              + scale_color_manual(values = c("#377eb8","#f89441","#cc4678")))
 ggplotly(plot) 
 
 ###Problem with this is that age groups are mixed in...seperate this
@@ -72,13 +72,14 @@ p <- print(dta4 %>%
            + geom_line()
            + labs(y="Average job tenure",x="Years")
            + theme_minimal()
-           + theme(legend.position = "none",
+           + theme(
                    axis.title.x = element_text(size = 10,
                                                face = "bold",vjust=0.2),
                    axis.title.y = element_text(size=10,
                                                face="bold"),
                    axis.text.x = element_text(face="bold"),
-                   axis.text.y = element_text(face="bold")))
+                   axis.text.y = element_text(face="bold"))
+           + scale_color_manual(values = c("#f89441","#cc4678","#7e03a8","#0d0887")))
 
 
 p1 <- print(p 
