@@ -42,8 +42,8 @@ library(d3r)
 
 * Topic: labour data from Statistics Canada
 * Two Part exploratory analysis: 
-+ Job tenure over time
-+ The state of the gender pay gap today
+  + Job tenure over time
+  + The state of the gender pay gap today
 
 ## Job Tenure of Canada
 - Based on data from Statistics Canada, we wish to explore how the length of employment changed over the period of 1976 to 2018, by age and sex. 
@@ -54,6 +54,7 @@ library(d3r)
 - Selected high contrast colors and added directed labels 
 - Output as MP4 to have more control of each frame and slowed down the animation with fps
 - For visual purposes, assumed bin width to be equal for each bracket 
+
 ## An animated pyramid plot
 <video width="750" height="450" controls>
   <source src="output_pyramid.mp4" type="video/mp4">
@@ -133,34 +134,30 @@ ggplotly(plot)
   *	After 1996, mean tenure for men has decreased compared to previous years 
   *	See impact of the recession here as well 
   *	This graph did not take account the age groups, so this plot can be misleading
-  o	View age separately for each gender 
+  *	View age separately for each gender 
   
   
 ## Average Tenure by Sex and Age
-  -	Selected colors with high contrast, aesthetic consistency with other plots, and to highlight the ordered age categories while trying to keep the image accessible to the visually impaired.
-  -	Facets were used to allow a side-by-side comparison of trends for each gender and age group
-  -	We used a linear axis as the discrepancies between groups were fairly substantial and a log scale would have been rather deceptive when it came to showing the differences between groups. 
-  -	Interactive elements were used as they allow the data to be explored in greater detail without adding excessive clutter to the plot.
-  -	For females, we see that for all age groups except for the 15 to 24 year age brackets, there is a slight increase in the average job tenure over time.
-  -	For males aged 65 years or more, job tenure increases until 1996 and substantially decreases afterwards. We also see a similar trend in 55 to 64 year old males, though the decrease is very marginal compared to 65 years and older. 
+  *	Selected colors with high contrast, aesthetic consistency with other plots, and to highlight the ordered age categories while trying to keep the image accessible to the visually impaired.
+  *	Facets were used to allow a side-by-side comparison of trends for each gender and age group
+  *	We used a linear axis as the discrepancies between groups were fairly substantial and a log scale would have been rather deceptive when it came to showing the differences between groups. 
+  *	Interactive elements were used as they allow the data to be explored in greater detail without adding excessive clutter to the plot.
+  *	For females, we see that for all age groups except for the 15 to 24 year age brackets, there is a slight increase in the average job tenure over time.
+  *	For males aged 65 years or more, job tenure increases until 1996 and substantially decreases afterwards. We also see a similar trend in 55 to 64 year old males, though the decrease is very marginal compared to 65 years and older. 
 
 ## Sunburst Plot
-  -	Cumulatively from 1976 to 2018, the workforce is 40% female and 60% male. 
+  	Cumulatively from 1976 to 2018, the workforce is 40% female and 60% male. 
   -	The largest tenure bracket for both genders appears to be 1 to 5 years, though the 5 to 10 year, 10 to 20 year, and 20 plus year brackets are all fairly large as well. 
   -	We can explore the workforce composition for each sex at different job tenure levels during different years. For example, among female workers who have been at their jobs for 1 to 5 years in 2009, the majority are between 25 and 54 years old. 
   -	We can also look at the same scenario for men. In 2009, male workers who have been at their job for 1 to 5 years are overwhelmingly between 25 and 54 years old, mirroring the trend that we saw in female workers.
   
 ## Overall Conclusion
-  -	Job tenures are increasing for females, whereas job tenure for males is decreasing.  Several possible reasons for these trends are: 
-    o	better workplace accommodations for women such as maternity leave, as well as possible social shifts on the role of men in parenting. 
-  o	The unstable yet highly lucrative nature of work in the technology sector, which is heavily male-dominated, may partially explain the trend towards shorter job tenures for males, who may hop from one startup company to another for short periods of time before making enough money to exit the traditional full-time workforce. 
-  o	Globalization may result in highly experienced workers having greater access to lucrative job positions in other countries, which would result in an outflux of workers in older age brackets.
-  o	People from the silent generation may have come to retirement age in large numbers from 1997 onwards
+*	Job tenures are increasing for females, whereas job tenure for males is decreasing.  Several possible reasons for these trends are: 
+    +	better workplace accommodations for women such as maternity leave, as well as possible social shifts on the role of men in parenting. 
+  +	The unstable yet highly lucrative nature of work in the technology sector, which is heavily male-dominated, may partially explain the trend towards shorter job tenures for males, who may hop from one startup company to another for short periods of time before making enough money to exit the traditional full-time workforce. 
+  +	Globalization may result in highly experienced workers having greater access to lucrative job positions in other countries, which would result in an outflux of workers in older age brackets.
+  +	People from the silent generation may have come to retirement age in large numbers from 1997 onwards
   Choropleth
-  -	Now that we have looked at how job tenures for both sexes have changed over time, we will now change our focus to pay, namely the state of the gender pay gap today. 
-  
-  
-  
   
 ## Average job tenure by Age and Gender 
 
