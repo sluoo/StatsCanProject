@@ -43,34 +43,37 @@ library(d3r)
 * Topic: labour data from Statistics Canada
 * Two Part exploratory analysis: 
   + Job tenure over time
-  + The state of the gender pay gap today
+  + Gender Pay Gap by field of study and geography
 
-## Job Tenure of Canada
-- Based on data from Statistics Canada, we wish to explore how the length of employment changed over the period of 1976 to 2018, by age and sex. 
-- Job tenure is defined as the length of time a work has been continuously employed by the same employer and is not affected if an employee changes position within the same company
+## Part 1: Job Tenure of Canada
+- How has the length of employment changed from 1976 to 2018, by age and sex? 
+- Job tenure: the length of time a work has been continuously employed by the same employer and is not affected if an employee changes position within the same company
 
 ## An animated pyramid plot 
-- The animated pyramid plot illustrates the evolution of tenure according to gender from 1976 to 2018. 
-- Selected high contrast colors and added directed labels 
-- Output as MP4 to have more control of each frame and slowed down the animation with fps
+- Illustrate changes in job tenure by gender from 1976 to 2018. 
+- High contrast colors and added direct labels 
+- Output as MP4: control over playback, slowed down the animation with fps
 - For visual purposes, assumed bin width to be equal for each bracket 
 
 ## An animated pyramid plot
 <video width="750" height="450" controls>
-  <source src="output_pyramid.mp4" type="video/mp4">
-    </video>
+<source src="output_pyramid.mp4" type="video/mp4">
+</video>
 
 ## An animated pyramid plot 
-* It appears that job tenure has increased for both genders and high proportion of men in each of the three categories compared to women. 
+* Job tenure has increased for both genders 
+  + high proportion of men in each of the three categories compared to women. 
 * Impact of economic trends on job tenure
-  + Generally, when the economy is stable, the number of short-term jobs increase, and transition cycles follow accordingly
-  + When a financial crisis strikes such as the recession in 2008 - 2012, the number of short-term jobs decrease, but the transition cycles in both the intermediate and longer-term brackets remain relatively unchanged. 
-  + i.e. layoffs affect workers with lower seniority more compared to workers with higher seniority 
+  + Stable Economy &rarr; more short-term jobs, and transition cycles follow accordingly
+  + Financial Crisis (e.g. 2008 - 2012 recession) &rarr; fewer short-term jobs 
+    - Transition cycles in both the intermediate and longer-term brackets remain relatively unchanged. 
+  + Increase seniority &rarr; workers less affected by layoffs 
 
-## Average Tenure by Sex
+## Average job tenure in Canada by Sex
+  *	Examine mean tenure by gender for more detailed trends  
   *	Created interactive plot with plotly 
-  *	Selected high contrast colors and to be consistent applied the same colors used in the previous plot 
-  *	Interactive component (hover for more detail and able to click and hide legend)
+  *	Colors: high contrast, consistent with previous plot 
+  *	Interactive: details on hover, click legend to show/hide groups
 
 ## Average job tenure in Canada by Sex 
 
@@ -127,37 +130,20 @@ ggplotly(plot)
 
 ```
 
-## Average Tenure by Sex 
-  *	Examined mean tenure by gender and a more detailed trend of job tenure is exhibited  
-  *	Huge gap between men and women but over time this gap narrowed as more women entered the work force around the early 90s 
-  *	Mean tenure for women has been increasing steadily.
-  *	After 1996, mean tenure for men has decreased compared to previous years 
+## Average job tenure in Canada by Sex 
+  *	Huge gap between men and women in 1976 
+    + Gap narrowed over time as more women started working (early 1990s)
+  *	Mean tenure for women increasing steadily.
+  *	After 1996 - mean tenure for men has decreased 
   *	See impact of the recession here as well 
   *	This graph did not take account the age groups, so this plot can be misleading
-  *	View age separately for each gender 
-  
-  
-## Average Tenure by Sex and Age
-  *	Selected colors with high contrast, aesthetic consistency with other plots, and to highlight the ordered age categories while trying to keep the image accessible to the visually impaired.
-  *	Facets were used to allow a side-by-side comparison of trends for each gender and age group
-  *	We used a linear axis as the discrepancies between groups were fairly substantial and a log scale would have been rather deceptive when it came to showing the differences between groups. 
-  *	Interactive elements were used as they allow the data to be explored in greater detail without adding excessive clutter to the plot.
-  *	For females, we see that for all age groups except for the 15 to 24 year age brackets, there is a slight increase in the average job tenure over time.
-  *	For males aged 65 years or more, job tenure increases until 1996 and substantially decreases afterwards. We also see a similar trend in 55 to 64 year old males, though the decrease is very marginal compared to 65 years and older. 
 
-## Sunburst Plot
-  	Cumulatively from 1976 to 2018, the workforce is 40% female and 60% male. 
-  -	The largest tenure bracket for both genders appears to be 1 to 5 years, though the 5 to 10 year, 10 to 20 year, and 20 plus year brackets are all fairly large as well. 
-  -	We can explore the workforce composition for each sex at different job tenure levels during different years. For example, among female workers who have been at their jobs for 1 to 5 years in 2009, the majority are between 25 and 54 years old. 
-  -	We can also look at the same scenario for men. In 2009, male workers who have been at their job for 1 to 5 years are overwhelmingly between 25 and 54 years old, mirroring the trend that we saw in female workers.
-  
-## Overall Conclusion
-*	Job tenures are increasing for females, whereas job tenure for males is decreasing.  Several possible reasons for these trends are: 
-    +	better workplace accommodations for women such as maternity leave, as well as possible social shifts on the role of men in parenting. 
-  +	The unstable yet highly lucrative nature of work in the technology sector, which is heavily male-dominated, may partially explain the trend towards shorter job tenures for males, who may hop from one startup company to another for short periods of time before making enough money to exit the traditional full-time workforce. 
-  +	Globalization may result in highly experienced workers having greater access to lucrative job positions in other countries, which would result in an outflux of workers in older age brackets.
-  +	People from the silent generation may have come to retirement age in large numbers from 1997 onwards
-  Choropleth
+## Average Tenure by Sex and Age
+  *	View age separately for each gender 
+  *	Colors: contrast, consistency, accessibility, highlight age categories
+  *	Facets: side-by-side comparison of trends by gender and age
+  *	Linear axis: honest representation of the discrepancies between groups 
+  *	Interactive: explore data without adding excessive clutter
   
 ## Average job tenure by Age and Gender 
 
@@ -210,6 +196,15 @@ p1 <- print(p
 ggplotly(p1)
 
 ```
+
+## Average job tenure by Age and Gender
+  *	Females: 
+    + 15 to 24 year age group - few if any changes over time
+    + All other groups - slight increase in average job tenure over time.
+  *	Males: 
+    + 65 years or more -  job tenure increases until 1996, then substantially decreases 
+    + Similar trend in 55 to 64 year old males, though to a lesser degree
+    + Other age groups - few (if any) changes
 
 ## A Sunburst Plot
 ```{r sunburst_setup, message=FALSE, warning=FALSE, include=FALSE}
@@ -282,22 +277,46 @@ sunplot1
 
 ```
 
+## Sunburst Plot
+* Cumulatively from 1976 to 2018, the workforce is 40% female and 60% male. 
+* Largest Age Bracket is 1 to 5 years
+  + 5 to 10 year, 10 to 20 year, and over 20 year brackets large as well. 
+* We can explore the workforce composition for each sex at different job tenure levels during different years. 
+  + e.g. Female workers in 2009 (tenure of 1 to 5 years): mostly 25 and 54 years old. 
+  + Male workers in 2009 (tenure of 1 to 5 years): same trend as female workers
+  
+## Conclusion (Job Tenure)
+*	Job tenures: increasing for females, decreasing for males.
+* Possible reasons include: 
+  +	Better workplace accommodations for women
+  + Social shifts on the role of men in parenting. 
+  +	Unstable yet lucrative work in technology sector (male dominated) 
+  +	Globalization &rarr; highly experienced (older) workers leaving for countries
+  +	Silent generation coming to retirement age (1997 onwards)
 
-
-## Pay Gaps, Industry, and Geography
+## Part II: Pay Gaps, Industry, and Geography
 * When talking about job data, one thing that frequently comes up is the gender wage gap
-* Common saying is that women get paid 70 cents for every dollar men get paid
-* Problem is that pay depends on many different factors
-* Among people with the same educational level and the same field of study, is there a major gender pay gap for different parts of Canada?
+* Common saying: women get paid 77 cents for every dollar men get paid (e.g. Barack Obama)
+* Difficult to quantify - pay depends on many different factors
+* We wish to investigate two things:
+  + For the same educational level and field of study, how do male and female pay differ?
+  + Could gender representation by field of study be linked to a pay gap?
 
 ## Pay Gaps, Industry, and Geography
 * We combined two subsets of the 2016 Census Data
   + Employment Income by Major Field of Study (98-400-X2016280)
   + Field of Study Groupings for Age Groups, Sex, and educational attainment (98-402-X2016010-T4)
-* We then calculated the proportion of females in the workforce using the count data of each cohort
 * Cleaned data was used to create a faceted map
 * ggplotly was used to make the facet plot interactive
 * Tooltips of detailed information were added using "dummy" aesthetics in ggplot
+  + Median pay by gender, cohort size, female representation
+
+## Pay Gaps, Industry, and Geography
+* Choropleth: see common fields of study by geography
+* Facets: show geographical trends by educational level
+* Colors: consistency, contrast, accessibility
+  - Color by most common field of study at given education level
+* Interactive: explore pay & workforce makeup per province/territory
 
 ## Pay Gaps, Industry, and Geography
 
@@ -468,8 +487,28 @@ plot <- (ggplot(joined_dta)
 )
 ```
 
-## Overall Conclusions
-* Canada's workforce:
-  + Has changed a lot over time demographically
-  +
-  + Exhibits a gender pay gap
+## Pay Gaps, Industry, and Geography
+* In terms of fields of study:
+  + Business: overall very popular across Canada
+    - Female representation inversely proportional to education
+    - Consistent gender pay gap
+  + Education: praries/territories, non-doctorate university level
+    - Female-dominant at all education levels
+    - Males generally get paid more
+
+## Pay Gaps, Industry, and Geography
+  + Science: predominant at doctorate level across Canada 
+    - low/moderate female representation
+    - Males generally get paid more
+  + Social Sciences: Bachelor's level for a few jurisdictions only, 
+    - Over 60 percent female
+    - Consistent gender pay gap
+  + Trades: College level, northern territories, 
+    - Low female representation
+    - Consistent gender pay gap    
+
+## Conclusions (Gender Pay Gap)
+  * Consistent evidence of a gender pay gap
+    + Pay gap persists across the country at all education levels for all fields, with few exceptions
+    + Few geographical indications of pay gap size, which is highly variable
+    + Gender representation unrelated to gender pay gaps
