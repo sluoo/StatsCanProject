@@ -153,7 +153,7 @@ plot <- (ggplot(joined_dta)
                  )
 )
 
-##Choropleth with multiple tooltips
+##Map with multiple tooltips
 ##Trick is to use previously established dummy aesthetics to display info in joined table
 
 htmlplot <- (ggplotly(plot, tooltip=c("common", "label1", "label2", "label3", "label4"), width=800, height=450) 
@@ -165,5 +165,48 @@ htmlplot <- (ggplotly(plot, tooltip=c("common", "label1", "label2", "label3", "l
   %>% layout(autosize=F, legend=list(x=0.7, y=0.025, yanchor="bottom"), hovermode = "closest") 
 )
 
-#Export to html file
-htmlwidgets::saveWidget(as_widget(htmlplot), "choropleth.html")
+####################################################
+
+#Separate Plots by Education Level
+
+
+edl1 <- (merged %>% dplyr::filter(Education=="College, CEGEP or other non-university certificate or diploma") 
+         %>% plot_ly(x = ~`Median Income`, y = ~GeoName, 
+                   text = ~`Median Income`, 
+                   hoverinfo = text) 
+  %>% add_markers(frame = ~Industry, color = ~Sex)
+  %>% layout()
+)
+
+edl2 <- (merged %>% dplyr::filter(Education=="University certificate, diploma or degree at bachelor level or above") 
+         %>% plot_ly(x = ~`Median Income`, y = ~GeoName, 
+                     text = ~`Median Income`, 
+                     hoverinfo = text) 
+         %>% add_markers(frame = ~Industry, color = ~Sex)
+         %>% layout()
+)
+
+edl3 <- (merged %>% dplyr::filter(Education=="Bachelor's degree") 
+         %>% plot_ly(x = ~`Median Income`, y = ~GeoName, 
+                     text = ~`Median Income`, 
+                     hoverinfo = text) 
+         %>% add_markers(frame = ~Industry, color = ~Sex)
+         %>% layout()
+)
+
+edl4 <- (merged %>% dplyr::filter(Education=="Master's degree") 
+         %>% plot_ly(x = ~`Median Income`, y = ~GeoName, 
+                     text = ~`Median Income`, 
+                     hoverinfo = text) 
+         %>% add_markers(frame = ~Industry, color = ~Sex)
+         %>% layout()
+)
+
+edl5 <- (merged %>% dplyr::filter(Education=="Earned doctorate") 
+         %>% plot_ly(x = ~`Median Income`, y = ~GeoName, 
+                     text = ~`Median Income`, 
+                     hoverinfo = text) 
+         %>% add_markers(frame = ~Industry, color = ~Sex)
+         %>% layout()
+)
+
