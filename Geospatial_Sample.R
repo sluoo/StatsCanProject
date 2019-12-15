@@ -153,7 +153,7 @@ plot <- (ggplot(joined_dta)
                  )
 )
 
-##Choropleth with multiple tooltips
+##Map with multiple tooltips
 ##Trick is to use previously established dummy aesthetics to display info in joined table
 
 htmlplot <- (ggplotly(plot, tooltip=c("common", "label1", "label2", "label3", "label4"), width=800, height=450) 
@@ -165,5 +165,72 @@ htmlplot <- (ggplotly(plot, tooltip=c("common", "label1", "label2", "label3", "l
   %>% layout(autosize=F, legend=list(x=0.7, y=0.025, yanchor="bottom"), hovermode = "closest") 
 )
 
-#Export to html file
-htmlwidgets::saveWidget(as_widget(htmlplot), "choropleth.html")
+####################################################
+
+#Separate Plots by Education Level
+
+spreaddta <- (merged 
+              %>% mutate(`Median Income`= replace(`Median Income`, `Median Income`==0, NA))
+              %>% select(-c('AreaTotal', 'Cohort Size')) 
+              %>% spread(key=Education, value='Median Income')
+%>% rename( "College"="College, CEGEP or other non-university certificate or diploma",
+            "UniCert"="University certificate, diploma or degree at bachelor level or above",
+            "Bachelor"="Bachelor's degree",
+            "Master"="Master's degree",
+            "Doctorate"="Earned doctorate")
+)
+
+edl2 <- (plot_ly(spreaddta, frame = ~Industry, y = ~GeoName) 
+         %>% add_markers(x = ~College, color = ~Sex, visible = TRUE)
+         %>% add_markers(x = ~UniCert, color = ~Sex, visible = TRUE)
+         %>% add_markers(x = ~Bachelor, color = ~Sex, visible = TRUE)
+         %>% add_markers(x = ~Master, color = ~Sex, visible = TRUE)
+         %>% add_markers(x = ~Doctorate, color = ~Sex, visible = TRUE)
+         %>% layout(
+           updatemenus = list(
+            list( x=0.9, y = 0.8,
+             buttons = list(
+               list(method = "restyle",
+                    args = list("visible", list(TRUE, FALSE, FALSE, FALSE, FALSE)),
+                    label = "College/Other"),
+               list(method = "restyle",
+                    args = list("visible", list(FALSE, TRUE, FALSE, FALSE, FALSE)),
+                    label = "University Certificate"),
+                list(method = "restyle",
+                    args = list("visible", list(FALSE, FALSE, TRUE, FALSE, FALSE)),
+                    label = "Bachelor's Degree"),
+                list(method = "restyle",
+                    args = list("visible", list(FALSE, FALSE, FALSE, TRUE, FALSE)),
+                    label = "Master's Degree"),
+                list(method = "restyle",
+                    args = list("visible", list(FALSE, FALSE, FALSE, FALSE, TRUE)),
+                    label = "Doctorate"))))))
+
+# edl2 <- (plot_ly(spreaddta, y = ~GeoName)
+#          %>% add_markers(x = ~College, frame = ~Industry, color = ~Sex, visible = TRUE)
+#          %>% add_markers(x = ~UniCert, frame = ~Industry, color = ~Sex, visible = FALSE)
+#          %>% add_markers(x = ~Bachelor, frame = ~Industry, color = ~Sex, visible = FALSE)
+#          %>% add_markers(x = ~Master, frame = ~Industry, color = ~Sex, visible = FALSE)
+#          %>% add_markers(x = ~Doctorate, frame = ~Industry, color = ~Sex, visible = FALSE)
+#          %>% layout(
+#            updatemenus = list(
+#              list( x=0.9, y = 0.8,
+#                    buttons = list(
+#                      list(method = "restyle",
+#                           args = list("visible", list(TRUE, FALSE, FALSE, FALSE, FALSE)),
+#                           label = "College/Other"),
+#                      list(method = "restyle",
+#                           args = list("visible", list(FALSE, TRUE, FALSE, FALSE, FALSE)),
+#                           label = "University Certificate"),
+#                      list(method = "restyle",
+#                           args = list("visible", list(FALSE, FALSE, TRUE, FALSE, FALSE)),
+#                           label = "Bachelor's Degree"),
+#                      list(method = "restyle",
+#                           args = list("visible", list(FALSE, FALSE, FALSE, TRUE, FALSE)),
+#                           label = "Master's Degree"),
+#                      list(method = "restyle",
+#                           args = list("visible", list(FALSE, FALSE, FALSE, FALSE, TRUE)),
+#                           label = "Doctorate"))))))
+
+
+
