@@ -5,11 +5,8 @@ theme_update(panel.spacing = grid::unit(0, "lines"))
 library(scales)
 library(viridis)
 library(broom)
-library(gganimate)
 library(RColorBrewer)
-library(plotly)
 library(forcats)
-library(shiny)
 
 ##Facet plot for gender breakdown by Industry
 ## Additional tooltips for Workforce size, male and female median annual wages
@@ -20,7 +17,7 @@ library(shiny)
 ##download.file("https://www12.statcan.gc.ca/census-recensement/2016/dp-pd/hlt-fst/edu-sco/Tables/Files/98-402-X2016010-T4-csv-eng.zip", destfile="Utility/statscan.zip")
 
 ##Wage Data File by Industry
-##Custom extraction from original 6GB census data (see script used elsewhere
+##Custom extraction from original 6GB census data (see script used elsewhere)
 ## If no Income data is available, replace value with "No Data"
 merged <- (read_csv("Utility/wageData_national.csv") 
            %>% filter(`Median Income`!= 0))
