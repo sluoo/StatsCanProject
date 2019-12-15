@@ -45,9 +45,10 @@ Facet_names <- c(
 
 (ggplot(merged, aes(x=merged$`Median Income`, y=Industry, fill=Sex))
 + geom_dotplot(binaxis="y", binwidth=0.6, stroke=0)
-+ facet_grid(Education ~ Age, labeller = labeller(Education = Facet_names))
 + theme_classic()
 + scale_fill_manual(values = c("pink","blue"))
++ scale_x_log10(labels= comma)
++ facet_grid(Education ~ Age, labeller = labeller(Education = Facet_names))
 + xlab("National Median Income (CAD)")
 )
 
