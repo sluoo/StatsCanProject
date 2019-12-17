@@ -22,6 +22,7 @@ theme_update(panel.spacing = grid::unit(0, "lines"))
 library(scales)
 library(viridis)
 library(broom)
+library(plotly)
 library(RColorBrewer)
 library(forcats)
 library(plotly)
@@ -144,15 +145,96 @@ ggplotly(p1, width=850, height=500)
 
 ```
 
+
+```{r averagetenurebysex3, message=FALSE, warning=FALSE, include=FALSE}
+dta <- get_cansim(1410005101) %>% normalize_cansim_values()
+
+
+#CleanData 
+dta1 <- (dta
+         %>% select(REF_DATE,GEO,`Job tenure`,
+                    `Type of work`,Sex,`Age group`,VALUE)
+         %>% filter(GEO=="Canada",
+                    str_starts(`Job tenure`,"Average"),
+                    str_starts(`Type of work`,"Full"),
+                    str_detect(`Age group`, "to|65"),
+                    str_detect(`Age group`,"44",negate = TRUE))
+         %>% mutate(`Job tenure`=factor(`Job tenure`),Sex=factor(Sex),
+                    REF_DATE=as.numeric(REF_DATE),`Age group`=factor(`Age group`),
+                    VALUE=as.numeric(VALUE))
+         %>% drop_na())
+
+
+
+###Problem with this is that age groups are mixed in...seperate this
+
+dta3 <- data.frame(dta1 
+                   %>% group_by(REF_DATE,Sex,`Age group`)
+                   %>% summarise(mean_tenure = round((mean(VALUE))/12,1))
+                   %>% rename(Year=REF_DATE,AvgTenure=mean_tenure))
+
+
+
+#display age and facet gender 
+dta4 <- (dta3
+         %>% filter(Sex !="Both sexes")
+         %>% mutate(Age.group=fct_relevel(Age.group,
+                                          c("65 years and over",
+                                            "55 to 64 years",
+                                            "25 to 54 years",
+                                            "15 to 24 years"))))
+
+dta_size <- (dta1
+             %>% filter(Sex!="Both sexes")
+             %>% group_by(REF_DATE,Sex,`Age group`)
+             %>% summarise(CohortSize = sum(VALUE)))
+
+
+line_width = rep(c(0.01,0.2,0.5,0.85),86)
+
+data1 <- (data.frame(dta4,dta_size$CohortSize,line_width)
+          %>% rename(CohortSize=dta_size.CohortSize))
+          #%>% mutate(line_width=factor(line_width)))
+View(data1)
+
+
+#remove points to avoid crowding 
+p <- print(data1 %>% 
+             ggplot(aes(x=Year,y=AvgTenure,size=line_width))
+           + geom_line(aes(color=Age.group))
+           + labs(y="Average job tenure (Years)",x="Years")
+           + theme_minimal()
+           + theme(
+             axis.title.x = element_text(size =9,
+                                         face = "bold"),
+             axis.title.y = element_text(size=9,
+                                         face="bold"),
+             axis.text.x = element_text(face="bold"),
+             axis.text.y = element_text(face="bold"))
+           + scale_color_manual(values = rev(c("#f89441","#cc4678","#7e03a8","#0d0887"))))
+
+
+p1size <- print(p 
+            + facet_grid(.~Sex)
+            + theme(strip.text.x = element_text(size=9,face="bold"),
+                    strip.background = element_rect(fill="white")))
+
+```
+
+```{r averagetenurebysex2_plot, echo=FALSE, message=FALSE, warning=FALSE}
+ggplotly(p1size, width=850, height=500)
+
+```
+
 ### Story:
 
-We created two plots based on the average job tenure. In the first plot, we examined the average tenure by gender and more detailed trends are presented. We see a huge gap between men and women but with time this gap narrowed around the early 2000s due to more women entering the work force around the early 1990s. There are more men in the workforce as indicated by similarity in trend for ?males? and ?both sex?. Comparing men and women, the average tenure for women increased steadily over time but decreased for men after 1996. However, this plot may be misleading as it does not consider the various age groups of each gender. To address this problem, it is best to separate the age groups for each gender. In this second plot, the average job tenure by gender and age are examined. For women, we see that for all age groups except 15 to 24 year old age brackets, there is a sight increase in the average job tenure over time. For men aged 65 years or more, job tenure increases until 1996 and substantially decreases afterwards. We also see a similar trend in 55 to 64 year old males, though the decrease is very marginal compared to 65 years and older. This slightly contradicts our observation from before since job tenure actually decreased for men after 1996.
+We created three plots based on the average job tenure. In the first plot, we examined the average tenure by gender and more detailed trends are presented. We see a huge gap between men and women but with time this gap narrowed around the early 2000s due to more women entering the work force around the early 1990s. There are more men in the workforce as indicated by similarity in trend for “males” and “both sex”. Comparing men and women, the average tenure for women increased steadily over time but decreased for men after 1996. However, this plot may be misleading as it does not consider the various age groups of each gender. To address this problem, it is best to separate the age groups for each gender. In this second plot, the average job tenure by gender and age are examined. For women, we see that for all age groups except 15 to 24 year old age brackets, there is a sight increase in the average job tenure over time. For men aged 65 years or more, job tenure increases until 1996 and substantially decreases afterwards. We also see a similar trend in 55 to 64 year old males, though the decrease is very marginal compared to 65 years and older. This slightly contradicts our observation from before since job tenure actually decreased for men after 1996. One issue that is arises is cohort size for each age group. We tried to indicate cohort size by varying the line width for second plot. We see that majority of the workforce is comprised of workers that are 55 years and older.
 
 
 ### Method: 
+The two interactive plots were created with plotly. For both plots, we opted for high contrast colors and used the same color palette for aesthetic consistency while trying to keep the plots accessible to the visually impaired. In the first plot, average tenure for men was represented in blue and dark pink for females. We felt purple would be more visually obvious to represent “the halfway” since average tenure for both sexes lie between males and females. In the second plot, the coloring scheme highlights the ordering of the age categories. To determine the line width in the third plot, we summed the overall cohort size for each age group and gender. For all the years, 65 years and plus had the largest cohort size, followed by 55 to 64, 25 to 54 years old and then 15 to 24 years old had the smallest cohort size. Then for each cohort size, we manually specify a line width. 
 
-The two interactive plots were created with plotly. For both plots, we opted for high contrast colors and used the same color palette for aesthetic consistency while trying to keep the plots accessible to the visually impaired. In the first plot, average tenure for men was represented in blue and dark pink for females. We felt purple would be more visually obvious to represent "halfway between" since average tenure for both sexes lie between males and females. In the second plot, the coloring scheme highlights the ordering of the age categories. Facets were used to allow a side-by-side comparison of trends for each gender and age group. We used a linear axis as the discrepancies between groups were substantial and a log-scale would have been rather deceptive when comparing the differences between groups. Additionally, units were rounded to tenth of the year as years is more comprehensible to the general audience. The interactive elements allowed the data to be explored in better detail without adding excessive cluster to the plots.
-
+Facets were used to allow a side-by-side comparison of trends for each gender and age group. We used a linear axis as the discrepancies between groups were substantial and a log-scale would have been rather deceptive when comparing the differences between groups. Additionally, units were rounded to tenth of the year as years is more comprehensible to the general audience. The interactive elements allowed the data to be explored in better detail without adding excessive cluster to the plots. 
 ## Sunburst Plot 
 
 ```{r sunburst, message=FALSE, warning=FALSE, include=FALSE}
@@ -274,6 +356,16 @@ Finally, we conclude the analysis with a sunburst plot. Initially, cumulatively 
 ### Method: 
 
 Sunburst plot was created with the sunburstR package. As Dr.Bolker has stated, these plots are heavily dependent on the ordering of the variables. To suit our analysis above, we selected the ordering to be  gender, job tenure, specific year then age group. We added a tooltip that allows a user to select a specific wedge of the plot and the breakdown can be seen on the right. We did consider rounding the numeric values in the tooltip, however, customizing it required knowledge of javascript. The d3.js categorical color scheme was used here. 
+
+### Possible Explainations for Observed Trend  
+Overall, we see that job tenures are increasing for females, whereas job tenure for males is decreasing.  Several possible reasons for these trends are: 
+
+-Better workplace accommodations for women such as maternity leave, as well as possible social shifts on the role of men in parenting. 
+-The unstable yet highly lucrative nature of work in the technology sector, which is heavily male-dominated, may partially explain the trend towards shorter job tenures for males, who may hop from one startup company to another for short periods of time before making enough money to exit the traditional full-time workforce. 
+-Globalization may result in highly experienced workers having greater access to lucrative job positions in other countries, which would result in an outflux of workers in older age brackets.
+-People from the silent generation may have come to retirement age in large numbers from 1997 onwards
+
+
 
 # Part II: Gender Pay Gap Analysis
 
