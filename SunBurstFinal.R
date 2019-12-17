@@ -4,6 +4,31 @@ library(stringr)
 library(gganimate)
 library(sunburstR)
 
+#Function to round values and add prefix 
+f2si_round<-function (number,rounding=F) 
+{
+  lut <- c(1e-24, 1e-21, 1e-18, 1e-15, 1e-12, 1e-09, 1e-06, 
+           0.001, 1, 1000, 1e+06, 1e+09, 1e+12, 1e+15, 1e+18, 1e+21, 
+           1e+24)
+  pre <- c("y", "z", "a", "f", "p", "n", "u", "m", "", "k", 
+           "M", "G", "T", "P", "E", "Z", "Y")
+  ix <- findInterval(number, lut)
+  if (lut[ix]!=1) {
+    if (rounding==T) {
+      sistring <- paste(round(number/lut[ix],1), pre[ix])
+    }
+    else {
+      sistring <- paste(number/lut[ix], pre[ix])
+    } 
+  }
+  else {
+    sistring <- as.character(number)
+  }
+  return(sistring)
+}
+
+
+
 dta <- get_cansim(1410005101) %>% normalize_cansim_values()
 
 #CleanData 
@@ -57,18 +82,12 @@ dta4 <- data.frame((dta31
 
 
 
-# sunplot <- sund2b(dta4,
-#                   rootLabel = "Sex",
-#                   colors = list(range=c("black", "#377EB8","#E41A1C", "orange", "#FF7F00", "#FFFF33", "#A65628", "#F781BF","#999999")),
-#                   tooltip =  sund2bTooltip(followMouse = TRUE,
-#                                            html = htmlwidgets::JS("
-# function(nodedata, size, percent) {
-#   return '<span style=\"font-weight: bold;\">' + nodedata.name + '</span>' + ' ' + size
-# }
-#     ")
-#                   ) 
-# )
-
+dta5 <- data.frame((dta31
+                    %>% mutate(REF_DATE=factor(REF_DATE))
+                    %>% select(`Sex`,`Job tenure`,REF_DATE,`Age group`,VALUE)
+                    %>% mutate(VALUE1 = f2si_round(VALUE,rounding = TRUE))
+                    %>% unite(seq,`Sex`:`Age group`,sep="-")
+                    %>% select(seq,VALUE1)))
 
 
 sunplot1 <- print(sund2b(dta4,
@@ -81,6 +100,9 @@ sunplot1 <- print(sund2b(dta4,
     ")
                   ) 
 ))
+
+
+
 
 
 
