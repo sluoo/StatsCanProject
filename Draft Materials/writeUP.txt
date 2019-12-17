@@ -1,0 +1,37 @@
+Part I: Job Tenure in Canada
+
+We conduct an exploratory analysis on job tenure data collected from Statistics Canada from 1976-2018. We wish to see how the length of employment of full-time workers has changed over time in Canada by gender and age. Job tenure measures the length of time an employee has been employed by their employer. For this analysis, job tenure was categorized into three groups: short-term (less than 1 year of employment), intermediate (1 to 5 years) and long-term (more than 5 years). 
+
+Back-to-back Pyramid Plot
+
+Story: 
+
+We start the analysis with an animated pyramid plot to compare changes in job tenure by gender from 1976-2018. It appears that job tenure has increased for both genders and a higher number of men appear in each of three groups compared to women. Additionally, changes in job tenure also depends on financial state of Canada. Generally, when the economy is stable, the number of short-term jobs increase and transitional stages (moving from short-term to intermediate and intermediate to long-term positions) follow accordingly. However, when a financial crisis strikes such as the recession in 2008-2012, the number of short-term jobs decrease, but the transition stages in both the intermediate and long-term group remain relatively unchanged (i.e. layoffs affect workers with lower seniorty more compared to workers with higher seniority). The pyramid plot is a nice visual but comparing the distributions of men and women is not obvious and difficult to do. But due to the animated component, each year can only be viewed individually not collectively (hence the possibility of being wrong, as we will see).
+
+Method:
+
+The cansim package allowed us to easily obtain the data from Statistics Canada. For cleaning, we filtered the necessary data and relabel/order the age and job tenure brackets for clarity. To create a symmetric back-to-back plot, the female values were multiplied by negative one. In terms of design, we selected high contrast colors to compare males and females and added direct labelling. However, as mentioned previously, comparing the distribution over time was not easy. Thus it may have been better to overlay the distributions rather than back-to-back as suggested by Dr.Bolker. The resulting plot will be less attractive but will be more informative for comparison. For more control on playback, we saved the plot as a MP4 and if played continuously each frame is played for 2 seconds (fps=2). Finally, for visual purposes we assumed the bin width to be equal for each job tenure bracket. 
+
+Average Tenure Plots
+
+Story:
+We created two plots based on the average job tenure. In the first plot, we examined the average tenure by gender and more detailed trends are presented. We see a huge gap between men and women but with time this gap narrowed around the early 2000s due to more women entering the work force around the early 1990s. There are more men in the workforce as indicated by similarity in trend for “males” and “both sex”. Comparing men and women, the average tenure for women increased steadily over time but decreased for men after 1996. However, this plot may be misleading as it does not consider the various age groups of each gender. To address this problem, it is best to separate the age groups for each gender. In this second plot, the average job tenure by gender and age are examined. For women, we see that for all age groups except 15 to 24 year old age brackets, there is a sight increase in the average job tenure over time. For men aged 65 years or more, job tenure increases until 1996 and substantially decreases afterwards. We also see a similar trend in 55 to 64 year old males, though the decrease is very marginal compared to 65 years and older. This slightly contradicts our observation from before since job tenure actually decreased for men after 1996.
+
+
+Method: 
+The two interactive plots were created with plotly. For both plots, we opted for high contrast colors and used the same color palette for aesthetic consistency while trying to keep the plots accessible to the visually impaired. In the first plot, average tenure for men was represented in blue and dark pink for females. We felt purple would be more visually obvious to represent "halfway between" since average tenure for both sexes lie between males and females. In the second plot, the coloring scheme highlights the ordering of the age categories. Facets were used to allow a side-by-side comparison of trends for each gender and age group. We used a linear axis as the discrepancies between groups were substantial and a log-scale would have been rather deceptive when comparing the differences between groups. Additionally, units were rounded to tenth of the year as years is more comprehensible to the general audience. The interactive elements allowed the data to be explored in better detail without adding excessive cluster to the plots.
+
+(Tony,I'm trying to add line width to represent cohort size for each age group, I'll let you know if I figure 
+this out) 
+
+Sunburst Plot 
+
+Story:
+Finally, we conclude the analysis with a sunburst plot. Initially, cumulatively from 1976-2018, the workforce is 40% female and 60% male. As we move upwards to each ring level, we can isolate and analyze specific combinations of the data. With this ordering, we can explore the age composition for each sex at different job tenure levels for different years. For example, among female workers who have been at their job for 1 to 5 years in 2009, majority are between 25 and 54 years old. This scenario can also be examined for men and we see that in 2009, male workers who have been at their job for 1-5 years are mostly between 25 and 54 years old, mirroring the trend that we saw in female workers. 
+
+Method: 
+Sunburst plot was created with the sunburstR package. As Dr.Bolker has stated, these plots are heavily dependent on the ordering of the variables. To suit our analysis above, we selected the ordering to be  gender, job tenure, specific year then age group. We added a tooltip that allows a user to select a specific wedge of the plot and the breakdown can be seen on the right. We did consider rounding the numeric values in the tooltip, however, customizing it required knowledge of javascript.  The d3.js categorical color scheme was used here. 
+
+
+
+
