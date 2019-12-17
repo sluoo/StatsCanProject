@@ -76,7 +76,7 @@ p1 <- print(p
             + theme(strip.text.x = element_text(size=9,face="bold"),
                     strip.background = element_rect(fill="white")))
 
-ggplotly(p1)
+ggplotly(p1,width=1200, height=1000)
 
 
 
