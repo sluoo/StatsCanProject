@@ -3,6 +3,7 @@ title: "Canada's Labour Force - Analysis"
 author: "Sherry Luo and Tony Wang"
 date: "17/12/2019"
 output:
+  pdf_document: default
   html_document: default
 bibliography: citations.bib
 ---
@@ -389,12 +390,12 @@ library(rgdal) #This seems to work better for me than sf for reading shape files
 
 ##Wage Data File by Industry
 ##Custom extraction from original 6GB census data
-wages <- read_csv("Writeup Stuff/wageData.csv")
+wages <- read_csv("wageData.csv")
 
 ## Unzip and read CSV for Industry by Gender (Note: Parsing failures are blank rows in the data)
 ## Many, many columns to rename...
 ## Drop useless columns and NA rows
-source <- read_csv("Writeup Stuff/98-402-X2016010-T4-CANPR-eng.csv") 
+source <- read_csv("98-402-X2016010-T4-CANPR-eng.csv") 
 source_renamed <- (source %>% rename("GeoName"="Geographic name", 
                                      "AreaTotal"="Total – STEM and BHASE (non-STEM) groupings - Classification of Instructional Programs (CIP) 2016 (2016 counts)",
                                      "Science and science technology"="STEM fields of study - Science and science technology (2016 counts)",
@@ -480,7 +481,7 @@ dtafin$`Median Income (Male)`[which(dtafin$`Median Income (Male)`==0)] <- "No Da
 
 ## Load Shape File, Join Shape File with Data 
 ## Use digital boundary file for performance
-canada_shape <- st_read("Writeup Stuff/lpr_000a16a_e.shp")
+canada_shape <- st_read("lpr_000a16a_e.shp")
 joined_dta <- left_join(canada_shape, dtafin, by=c("PRENAME"="GeoName")) %>% dplyr::rename("Jurisdiction"="PRENAME")
 
 ##Change strip text names without renaming data
@@ -553,7 +554,7 @@ Now that we have an idea of what the most common fields of study are in differen
 
 ### Method:
 
-To look at gender pay gaps, we combined industry and wage data obtained from the 2016 Census into an interactive, multi-faceted geospatial plot, coloured by the predominant field for each workfoace cohort. The data we used comes from two datasets of the 2016 Census, one of which covered wages of individuals by gender and field of study (Catalogue No. 98-400-X2016280), and one of which tallied the number of employees by various factors such as industry (Catalogue No. 98-402-X2016010-T4), gender, field of study and earned qualifications. The wage data from statistics Canada was extracted from the source data, a 6GB CSV file, using a workstation desktop with the necessary system resources to do so, and all plots were used on the reduced dataset to reduce system resource usage. These datasets were combined and used to create a five facet geospatial plot using the simplified digital boundary files. The use of digital boundary files rather than detailed cartographic files accelerates the rendering process and reduces the final file size, albeit at the cost of some information about the northern territories' islands. For the purposes of this analysis, this appears to be fine.
+To look at gender pay gaps, we combined industry and wage data obtained from the 2016 Census into an interactive, multi-faceted geospatial plot, coloured by the predominant field for each workfoace cohort. The data we used comes from two datasets of the 2016 Census, one of which covered wages of individuals by gender and field of study (Catalogue No. 98-400-X2016280  @statscan_data_big), and one of which tallied the number of employees by various factors such as field of study (Catalogue No. 98-402-X2016010-T4, @statscan_data_small), gender, and earned qualifications. The wage data from statistics Canada was extracted from the source data, a 6GB CSV file, using a workstation desktop with the necessary system resources to do so, and all plots were used on the reduced dataset to reduce system resource usage. These datasets were combined and used to create a five facet geospatial plot using the simplified digital boundary files. The use of digital boundary files rather than detailed cartographic files accelerates the rendering process and reduces the final file size, albeit at the cost of some information about the northern territories' islands. For the purposes of this analysis, this appears to be fine.
 
 The viridis "C" or "plasma" color scale was used for brightness and high contrast, not uniformity. Though the levels of the factors are not directional, these colors are still bright enough and distinctive enough such that they are suitable for distinguishing the different fields. It was decided to facet the geospatial data by education levels in order to best see how education levels may be related to the fields and location, and the rest of the information on cohort sizes, female representation, and salaries by field and gender were added into the hover tooltip through the use of several dummy aesthetics.
 
@@ -571,7 +572,7 @@ Overall, it seems that we do need to take a more in-depth look at the situation 
 ## Facet Dot Plot
 
 ```{r facetdot, echo=FALSE, fig.width=12, fig.height=10, message=FALSE, warning=FALSE}
-merged <- (read_csv("Writeup Stuff/wageData_national.csv") 
+merged <- (read_csv("wageData_national.csv") 
            %>% filter(`Median Income`!= 0))
 merged$Education <- factor(merged$Education, levels = c("College, CEGEP or other non-university certificate or diploma",
                                                         "University certificate, diploma or degree at bachelor level or above",
@@ -605,7 +606,7 @@ Facet_names <- c(
 
 ### Story
 
-Given the considerations we noted above, it was decided that a single static plot, with multiple facets for different industries, age groups, and education levels for national-level data, would allow us to somewhat address all of the issues at hand from the initial exploratory plot on regional-level data. Data was sourced again frome the 2016 census, except this time, age information was retained and since we are no longer interested in cohort sizes, it was possible to source all of the information from the 2016 Census, Catalogue No. 98-400-X2016280 (Statistics Canada, 2018). From the facet plot, we see that:
+Given the considerations we noted above, it was decided that a single static plot, with multiple facets for different industries, age groups, and education levels for national-level data, would allow us to somewhat address all of the issues at hand from the initial exploratory plot on regional-level data. Data was sourced again frome the 2016 census, except this time, age information was retained and since we are no longer interested in cohort sizes, it was possible to source all of the information from the 2016 Canadian Census, Catalogue No. 98-400-X2016280 @statscan_data_big. From the facet plot, we see that:
 
 - The gender pay gap seems to be the least prominent for the 15 to 29 year old age cohort. Whele the differences are slightly in favour of Males at the College level, and somewhat in favour of females at the Doctorate level, the difference at other levels of Education for this cohort, while technically in favour of males, is extremely small. 
 - For those aged 30 to 59, there is a consistent pay gap in favour of males across virtually every industry and education level up to the Master's degree level. While there are some exceptions where females are paid similarly, the gender pay gap appears fairly persistent across a variaety of circumstances. While there is a pay gap at the doctorate level that generally favours males, the picture is not as clear. 
