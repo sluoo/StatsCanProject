@@ -221,7 +221,7 @@ p1size <- print(p
 
 ```
 
-```{r averagetenurebysex2_plot, echo=FALSE, message=FALSE, warning=FALSE}
+```{r averagetenurebysex3_plot, echo=FALSE, message=FALSE, warning=FALSE}
 ggplotly(p1size, width=850, height=500)
 
 ```
