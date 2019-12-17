@@ -360,10 +360,10 @@ Sunburst plot was created with the sunburstR package. As Dr.Bolker has stated, t
 ### Possible Explainations for Observed Trend  
 Overall, we see that job tenures are increasing for females, whereas job tenure for males is decreasing.  Several possible reasons for these trends are: 
 
--Better workplace accommodations for women such as maternity leave, as well as possible social shifts on the role of men in parenting. 
--The unstable yet highly lucrative nature of work in the technology sector, which is heavily male-dominated, may partially explain the trend towards shorter job tenures for males, who may hop from one startup company to another for short periods of time before making enough money to exit the traditional full-time workforce. 
--Globalization may result in highly experienced workers having greater access to lucrative job positions in other countries, which would result in an outflux of workers in older age brackets.
--People from the silent generation may have come to retirement age in large numbers from 1997 onwards
+- Better workplace accommodations for women such as maternity leave, as well as possible social shifts on the role of men in parenting. 
+- The unstable yet highly lucrative nature of work in the technology sector, which is heavily male-dominated, may partially explain the trend towards shorter job tenures for males, who may hop from one startup company to another for short periods of time before making enough money to exit the traditional full-time workforce. 
+- Globalization may result in highly experienced workers having greater access to lucrative job positions in other countries, which would result in an outflux of workers in older age brackets.
+- People from the silent generation may have come to retirement age in large numbers from 1997 onwards
 
 
 
